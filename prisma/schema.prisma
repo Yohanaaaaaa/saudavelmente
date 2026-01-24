@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id        Int      @id @default(autoincrement())
+  nomeCompleto      String
+  cpf       String   @unique
+  email     String   @unique
+  celular   String
+  idade     Int
+  cidade    String
+  estado    String
+
+  appointments Appointment[]
+}
+
+enum TipoAtendimento {
+  VOLUNTARIO
+  SOCIAL
+}
+
+model Therapist {
+  id        Int      @id @default(autoincrement())
+  nomeCompleto      String
+  email     String   @unique
+  celular    String
+  tipo_atendimento    TipoAtendimento
+  verificacao_registro    Boolean  @default(false)
+  numero_registro     Int
+  horarioDisponivel    String
+  abordagem_e_experiencia    String
+  pix    String
+
+  appointments Appointment[]
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String   @unique
+  senha     String
+
+  createdAt DateTime @default(now())
+}
+
+model Appointment {
+  id                  Int      @id @default(autoincrement())
+
+  descricao           String
+  horario_atendimento DateTime
+  data_atendimento    String
+  
+  userId              Int
+  therapistId         Int
+
+  user                User      @relation(fields: [userId], references: [id])
+  therapist           Therapist @relation(fields: [therapistId], references: [id])
+
+  payment             Payment?
+
+  createdAt           DateTime  @default(now())
+}
+
+model Payment {
+  id            Int      @id @default(autoincrement())
+  valor         Float
+  status        String
+  metodo        String
+
+  appointmentId Int      @unique
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+
+  createdAt DateTime @default(now())
+}
