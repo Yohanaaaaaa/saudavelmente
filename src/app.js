@@ -6,7 +6,6 @@ app.use(express.json());
 module.exports = app;
 
 const authController = require('./controllers/auth.controller');
-//const patientController = require('./controllers/patient.controller');
 const therapistController = require('./controllers/therapist.controller');
 const appointmentController = require('./controllers/appointment.controller');
 const adminController = require('./controllers/admin.controller');
@@ -14,8 +13,8 @@ const adminController = require('./controllers/admin.controller');
 app.post('/auth/register', authController.register);
 app.post('/auth/login', authController.login);
 
-//app.post('/pacientes', patientController.create);
-//app.get('/pacientes', patientController.list);
+app.post('/pacientes', patientController.create);
+app.get('/pacientes', patientController.list);
 
 app.post('/profissionais', therapistController.create);
 app.get('/profissionais', therapistController.list);

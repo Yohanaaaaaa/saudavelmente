@@ -5,19 +5,27 @@ module.exports = {
 
   async create(req, res) {
     const {
-      nome,
+      nomeCompleto,
       email,
-      horario_disponivel,
-      tipo_atendimento
+      horarioDisponivel,
+      tipo_atendimento,
+      celular,
+      verificacao_registro,
+      abordagem_e_experiencia,
+      pix
     } = req.body;
 
     const therapist = await prisma.therapist.create({
       data: {
-        nome,
+        nomeCompleto,
         email,
-        horario_disponivel,
+        celular,
+        horarioDisponivel,
         tipo_atendimento,
-        registro_verificado: false
+        verificacao_registro: false,
+        numero_registro,
+        abordagem_e_experiencia,
+        pix
       }
     });
 

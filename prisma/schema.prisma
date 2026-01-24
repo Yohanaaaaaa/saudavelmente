@@ -10,10 +10,10 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = env("DATABASE_URL")
 }
 
-model User {
+model Patient {
   id           Int    @id @default(autoincrement())
   nomeCompleto String
   cpf          String @unique
@@ -38,7 +38,7 @@ model Therapist {
   celular                 String
   tipo_atendimento        TipoAtendimento
   verificacao_registro    Boolean         @default(false)
-  numero_registro         Int
+  numero_registro         String
   horarioDisponivel       String
   abordagem_e_experiencia String
   pix                     String
@@ -55,17 +55,24 @@ model Admin {
   createdAt DateTime @default(now())
 }
 
+enum AppointmentStatus {
+  PENDENTE
+  APROVADO
+  CANCELADO
+}
+
 model Appointment {
   id Int @id @default(autoincrement())
 
   descricao           String
   horario_atendimento DateTime
   data_atendimento    String
+  status AppointmentStatus @default(PENDENTE)
 
-  userId      Int
+  patientId      Int
   therapistId Int
 
-  user      User      @relation(fields: [userId], references: [id])
+  patient      Patient      @relation(fields: [patientId], references: [id])
   therapist Therapist @relation(fields: [therapistId], references: [id])
 
   payment Payment?
@@ -73,10 +80,16 @@ model Appointment {
   createdAt DateTime @default(now())
 }
 
+enum PaymentStatus {
+  PENDENTE
+  PAGO
+  CANCELADO
+}
+
 model Payment {
   id     Int    @id @default(autoincrement())
   valor  Float
-  status String
+  status PaymentStatus
   metodo String
 
   appointmentId Int         @unique
