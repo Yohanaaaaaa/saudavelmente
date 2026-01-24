@@ -1,0 +1,3 @@
+### Listar profissionais
+GET http://localhost:3000/profissionais
+Accept: application/json
