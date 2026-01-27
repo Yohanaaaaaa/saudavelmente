@@ -10,7 +10,7 @@ module.exports = {
       horarioDisponivel,
       tipo_atendimento,
       celular,
-      verificacao_registro,
+      numero_registro,
       abordagem_e_experiencia,
       pix
     } = req.body;

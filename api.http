@@ -1,3 +1,44 @@
 ### Listar profissionais
 GET http://localhost:3000/profissionais
 Accept: application/json
+
+### Criar paciente
+POST http://localhost:3000/pacientes
+Content-Type: application/json
+
+{
+  "nomeCompleto": "João da Silva",
+  "email": "joao@email.com",
+  "cpf": "123.456.789-00",
+  "celular": "98999999999",
+  "idade": 25,
+  "cidade": "São Luís",
+  "estado": "MA"
+}
+
+### Criar atendimento
+POST http://localhost:3000/atendimentos
+Content-Type: application/json
+
+{
+  "descricao": "Consulta inicial",
+  "horario_atendimento": "2026-02-01T14:00:00.000Z",
+  "therapistId": 1,
+  "patientId": 1,
+  "tipo_atendimento": "SOCIAL"
+}
+
+### Criar terapeuta
+POST http://localhost:3000/profissionais
+Content-Type: application/json
+
+{
+  "nomeCompleto": "Maria Oliveira",
+  "email": "maria.oliveira@email.com",
+  "celular": "98988887777",
+  "horarioDisponivel": "Seg–Sex 08:00–18:00",
+  "tipo_atendimento": "SOCIAL",
+  "abordagem_e_experiencia": "TCC, 5 anos de experiência",
+  "numero_registro": "CRP 06/12345",
+  "pix": "maria@pix.com"
+}

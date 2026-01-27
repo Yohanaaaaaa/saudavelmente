@@ -4,18 +4,25 @@ const prisma = new PrismaClient();
 module.exports = {
 
   async create(req, res) {
-    const { descricao, horario_atendimento, therapistId, userId, tipo_atendimento } = req.body;
+    const { descricao, horario_atendimento, therapistId, patientId, tipo_atendimento } = req.body;
 
     const appointment = await prisma.appointment.create({
-      data: {
-        descricao,
-        horario_atendimento,
-        therapistId,
-        userId,
-        tipo_atendimento,
-        status: 'PENDENTE'
-      }
-    });
+  data: {
+    descricao,
+    horario_atendimento,
+    status: 'PENDENTE',
+    data_atendimento: "HOJE",
+
+    patient: {
+      connect: { id: patientId }
+    },
+
+    therapist: {
+      connect: { id: therapistId }
+    }
+  }
+});
+
 
     res.status(201).json(appointment);
   },

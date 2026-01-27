@@ -7,6 +7,7 @@ module.exports = app;
 
 const authController = require('./controllers/auth.controller');
 const therapistController = require('./controllers/therapist.controller');
+const patientController = require('./controllers/patient.controller');
 const appointmentController = require('./controllers/appointment.controller');
 const adminController = require('./controllers/admin.controller');
 
