@@ -33,9 +33,7 @@ module.exports = {
   },
 
   async listPatients(req, res) {
-    const patients = await prisma.user.findMany({
-      where: { tipo: 'PACIENTE' }
-    });
+    const patients = await prisma.patient.findMany();
 
     res.json(patients);
   }
