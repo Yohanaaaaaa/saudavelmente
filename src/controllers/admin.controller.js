@@ -16,13 +16,7 @@ module.exports = {
   },
 
   async listAppointments(req, res) {
-    const atendimentos = await prisma.appointment.findMany({
-      include: {
-        user: true,
-        therapist: true,
-        payment: true
-      }
-    });
+    const atendimentos = await prisma.appointment.findMany();
 
     res.json(atendimentos);
   },
