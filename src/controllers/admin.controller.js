@@ -7,7 +7,7 @@ module.exports = {
     const solicitacoes = await prisma.appointment.findMany({
       where: { status: 'PENDENTE' },
       include: {
-        user: true,
+        patient: true,
         therapist: true
       }
     });
