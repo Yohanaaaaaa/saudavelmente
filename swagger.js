@@ -7,7 +7,7 @@ module.exports = swaggerJsdoc({
       title: "API",
       version: "1.0.0",
     },
-    servers: [{ url: "http://localhost:3007" }],
+    servers: [{ url: "https://saudavelmente.onrender.com" }],
   },
   apis: ["./src/app.js"],
 });
