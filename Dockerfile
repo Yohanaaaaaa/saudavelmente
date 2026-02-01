@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 3007
 
-CMD ["node", "src/server"]
+CMD ["node", "src/app"]
