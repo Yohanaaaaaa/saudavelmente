@@ -1,5 +1,7 @@
 const app = require('./src/app');
 
-app.listen(3007, () => {
-  console.log('SaudavelMente API rodando em http://localhost:3000');
+const PORT = process.env.PORT || 3007;
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`SaudavelMente API rodando na porta ${PORT}`);
 });
