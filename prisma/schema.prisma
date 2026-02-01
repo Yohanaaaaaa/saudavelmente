@@ -42,6 +42,7 @@ model Therapist {
   horarioDisponivel       String
   abordagem_e_experiencia String
   pix                     String
+  cpf                     String @unique                     
 
   appointments Appointment[]
 }
