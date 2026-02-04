@@ -11,7 +11,8 @@ module.exports = {
       celular,
       numero_registro,
       abordagem_e_experiencia,
-      pix
+      pix,
+      cpf
     } = req.body;
 
     const therapist = await prisma.therapist.create({
@@ -24,7 +25,8 @@ module.exports = {
         verificacao_registro: false,
         numero_registro,
         abordagem_e_experiencia,
-        pix
+        pix,
+        cpf
       }
     });
 

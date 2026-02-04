@@ -69,6 +69,7 @@ const paymentController = require('./controllers/payment.controller');
  *         numero_registro: { type: string, example: "CRP 00/00000" }
  *         abordagem_e_experiencia: { type: string, example: "TCC, 5 anos de experiência..." }
  *         pix: { type: string, example: "chave-pix@email.com" }
+ *         cpf: { type: string, example: "123.456.789-00" }
  *     AppointmentCreate:
  *       type: object
  *       required: [descricao, horario_atendimento, therapistId, patientId]
