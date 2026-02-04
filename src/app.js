@@ -14,6 +14,7 @@ const therapistController = require('./controllers/therapist.controller');
 const patientController = require('./controllers/patient.controller');
 const appointmentController = require('./controllers/appointment.controller');
 const adminController = require('./controllers/admin.controller');
+const paymentController = require('./controllers/payment.controller');
 
 /**
  * @swagger
@@ -245,6 +246,9 @@ app.get('/admin/profissionais', adminController.listTherapists);
  *         description: Lista de pacientes
  */
 app.get('/admin/pacientes', adminController.listPatients);
+
+app.post('/appointments/:appointmentId/pay', paymentController.pay);
+
 
 
 module.exports = app;
