@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 model Patient {
@@ -42,7 +42,7 @@ model Therapist {
   horarioDisponivel       String
   abordagem_e_experiencia String
   pix                     String
-  cpf                     String @unique                     
+  cpf                     String?         @unique
 
   appointments Appointment[]
 }
@@ -68,12 +68,12 @@ model Appointment {
   descricao           String
   horario_atendimento DateTime
   data_atendimento    String
-  status AppointmentStatus @default(PENDENTE)
+  status              AppointmentStatus @default(PENDENTE)
 
-  patientId      Int
+  patientId   Int
   therapistId Int
 
-  patient      Patient      @relation(fields: [patientId], references: [id])
+  patient   Patient   @relation(fields: [patientId], references: [id])
   therapist Therapist @relation(fields: [therapistId], references: [id])
 
   payment Payment?
@@ -88,7 +88,7 @@ enum PaymentStatus {
 }
 
 model Payment {
-  id     Int    @id @default(autoincrement())
+  id     Int           @id @default(autoincrement())
   valor  Float
   status PaymentStatus
   metodo String
