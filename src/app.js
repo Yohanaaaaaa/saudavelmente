@@ -30,10 +30,23 @@ const paymentController = require('./controllers/payment.controller');
  *         tipo: { type: string, example: "PACIENTE" }
  *     AuthLogin:
  *       type: object
- *       required: [email, senha]
+ *       required:
+ *         - email
+ *         - cpf
+ *         - tipo
  *       properties:
- *         email: { type: string, example: "joao@email.com" }
- *         senha: { type: string, example: "123456" }
+ *         email:
+ *           type: string
+ *           example: "user@email.com"
+ *         cpf:
+ *           type: string
+ *           example: "12345678900"
+ *         tipo:
+ *           type: string
+ *           enum:
+ *             - PATIENT
+ *             - THERAPIST
+ *           example: "PATIENT"
  *     PatientCreate:
  *       type: object
  *       required: [nomeCompleto, email, cpf, celular, idade, cidade, estado]
@@ -102,6 +115,8 @@ app.post('/auth/register', authController.register);
  *     responses:
  *       200:
  *         description: Token gerado
+ *       400:
+ *         description: Tipo de usuário inválido
  *       401:
  *         description: Credenciais inválidas
  */
