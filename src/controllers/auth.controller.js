@@ -62,7 +62,7 @@ async login(req, res) {
     { expiresIn: '1d' }
   );
 
-  res.json({ token });
+  res.json({ token, user });
 }
 
 };
