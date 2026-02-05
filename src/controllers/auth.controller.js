@@ -50,7 +50,7 @@ async login(req, res) {
     return res.status(401).json({ message: 'Credenciais inválidas' });
   }
 
-  const cpfValido = await bcrypt.compare(cpf, user.cpf);
+  const cpfValido = user.cpf == cpf;
 
   if (!cpfValido) {
     return res.status(401).json({ message: 'Credenciais inválidas' });

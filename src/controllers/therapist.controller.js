@@ -11,7 +11,8 @@ module.exports = {
       celular,
       numero_registro,
       abordagem_e_experiencia,
-      pix
+      pix,
+      cpf
     } = req.body;
 
     const therapist = await prisma.therapist.create({
@@ -24,7 +25,8 @@ module.exports = {
         verificacao_registro: false,
         numero_registro,
         abordagem_e_experiencia,
-        pix
+        pix,
+        cpf
       }
     });
 
@@ -34,7 +36,7 @@ module.exports = {
   async list(req, res) {
     const therapists = await prisma.therapist.findMany();
     res.json(therapists);
-  }
+  },
 
   async dashboardProfissional(req, res) {
     const { profissionalid } = req.params;
@@ -70,7 +72,7 @@ module.exports = {
         message: 'Erro ao buscar atendimentos do profissional'
       });
     }
-  }
+  },
   async updateByTherapist(req, res) {
     const { therapistid } = req.params;
     const data = req.body;

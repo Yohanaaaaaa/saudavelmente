@@ -32,9 +32,7 @@ module.exports = {
   async list(req, res) {
     const patients = await prisma.patient.findMany();
     res.json(patients);
-  }
-
-  
+  },
 
   async dashboardPaciente(req, res) {
     const { pacienteid } = req.params;
@@ -69,7 +67,7 @@ module.exports = {
       console.error(error);
       return res.status(500).json({ message: 'Erro ao buscar atendimentos' });
     }
-  }
+  },
   async updateByPatient(req, res) {
     const { patientid } = req.params;
     const data = req.body;
