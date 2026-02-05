@@ -263,7 +263,7 @@ app.get('/admin/profissionais', adminController.listTherapists);
  */
 app.get('/admin/pacientes', adminController.listPatients);
 
-app.post('/appointments/:appointmentId/pay', paymentController.pay);
+app.post('/pay', paymentController.pay);
 
 /**
  * @swagger
