@@ -263,7 +263,56 @@ app.get('/admin/profissionais', adminController.listTherapists);
  */
 app.get('/admin/pacientes', adminController.listPatients);
 
+/**
+ * @swagger
+ * /pay:
+ *   post:
+ *     summary: Gerar pagamento PIX
+ *     tags: [Pagamento]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - metodo
+ *               - nome
+ *               - email
+ *               - telefone
+ *               - cpf
+ *             properties:
+ *               metodo:
+ *                 type: string
+ *                 example: pix
+ *               nome:
+ *                 type: string
+ *                 example: João Silva
+ *               email:
+ *                 type: string
+ *                 example: joao@email.com
+ *               telefone:
+ *                 type: string
+ *                 example: 5598999999999
+ *               cpf:
+ *                 type: string
+ *                 example: 12345678900
+ *               cidade:
+ *                 type: string
+ *                 example: São Luís
+ *               estado:
+ *                 type: string
+ *                 example: MA
+ *     responses:
+ *       201:
+ *         description: PIX gerado com sucesso
+ *       400:
+ *         description: Dados inválidos ou erro ao criar pedido
+ *       500:
+ *         description: Erro interno ao gerar pagamento
+ */
 app.post('/pay', paymentController.pay);
+
 
 /**
  * @swagger
