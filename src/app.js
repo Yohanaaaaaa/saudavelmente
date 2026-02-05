@@ -264,8 +264,98 @@ app.get('/admin/profissionais', adminController.listTherapists);
 app.get('/admin/pacientes', adminController.listPatients);
 
 app.post('/appointments/:appointmentId/pay', paymentController.pay);
-app.get('/dashboard/paciente/:pacienteid',patientController.dashboardPatient);
-app.put('/profissional/:therapistid',therapistController.updateByTherapist);
-app.put('/paciente/:patientid',patientController.updateByPatient);
+
+/**
+ * @swagger
+ * /dashboard/paciente/{pacienteid}:
+ *   get:
+ *     summary: Dashboard do paciente
+ *     tags: [Dashboard]
+ *     parameters:
+ *       - in: path
+ *         name: pacienteid
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Dados do dashboard retornados
+ *       404:
+ *         description: Paciente não encontrado
+ */
+app.get('/dashboard/paciente/:pacienteid', patientController.dashboardPatient);
+
+/**
+ * @swagger
+ * /dashboard/profissional/{profissionalid}:
+ *   get:
+ *     summary: Dashboard do profissional
+ *     tags: [Dashboard]
+ *     parameters:
+ *       - in: path
+ *         name: profissionalid
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Dados do dashboard retornados
+ *       404:
+ *         description: Profissional não encontrado
+ */
+app.get('/dashboard/profissional/:profissionalid', therapistController.dashboardProfissional);
+
+/**
+ * @swagger
+ * /profissional/{therapistid}:
+ *   put:
+ *     summary: Atualizar profissional
+ *     tags: [Profissional]
+ *     parameters:
+ *       - in: path
+ *         name: therapistid
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Profissional atualizado
+ *       404:
+ *         description: Profissional não encontrado
+ */
+app.put('/profissional/:therapistid', therapistController.updateByTherapist);
+
+/**
+ * @swagger
+ * /paciente/{patientid}:
+ *   put:
+ *     summary: Atualizar paciente
+ *     tags: [Paciente]
+ *     parameters:
+ *       - in: path
+ *         name: patientid
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Paciente atualizado
+ *       404:
+ *         description: Paciente não encontrado
+ */
+app.put('/paciente/:patientid', patientController.updateByPatient);
+
 
 module.exports = app;
