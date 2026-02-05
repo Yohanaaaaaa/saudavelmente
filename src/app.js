@@ -332,7 +332,7 @@ app.post('/pay', paymentController.pay);
  *       404:
  *         description: Paciente não encontrado
  */
-app.get('/dashboard/paciente/:pacienteid', patientController.dashboardPatient);
+app.get('/dashboard/paciente/:pacienteid', patientController.dashboardPaciente);
 
 /**
  * @swagger
