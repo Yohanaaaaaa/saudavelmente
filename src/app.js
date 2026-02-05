@@ -248,7 +248,8 @@ app.get('/admin/profissionais', adminController.listTherapists);
 app.get('/admin/pacientes', adminController.listPatients);
 
 app.post('/appointments/:appointmentId/pay', paymentController.pay);
-
-
+app.get('/dashboard/paciente/:pacienteid',patientController.dashboardPatient);
+app.put('/profissional/:therapistid',therapistController.updateByTherapist);
+app.put('/paciente/:patientid',patientController.updateByPatient);
 
 module.exports = app;
