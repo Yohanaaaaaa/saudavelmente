@@ -89,15 +89,14 @@ POST http://localhost:3007/profissionais
 Content-Type: application/json
 
 {
-  "nomeCompleto": "Maria Oliveira",
-  "email": "maria.oliveira3@email.com",
-  "celular": "98988887777",
-  "horarioDisponivel": "Seg–Sex 08:00–18:00",
-  "tipo_atendimento": "SOCIAL",
-  "abordagem_e_experiencia": "TCC, 5 anos de experiência",
-  "numero_registro": "CRP 06/12345",
-  "pix": "maria@pix.com",
-  "cpf": "123.456.789-02"
+  "nomeCompleto": "Dra. Ana Lima",
+  "email": "ana55@email.com",
+  "celular": "5598999999999",
+  "horarioDisponivel": "Seg-Sex 18:00-21:00",
+  "numero_registro": "CRP 00/00000",
+  "abordagem_e_experiencia": "TCC, 5 anos de experiência...",
+  "pix": "chave-pix@email.com",
+  "cpf": "123.456.789-33"
 }
 
 ### Criar terapeuta

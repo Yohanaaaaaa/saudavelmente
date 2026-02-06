@@ -78,6 +78,7 @@ const paymentController = require('./controllers/payment.controller');
  *         horario_atendimento: { type: string, example: "2026-01-30T19:00:00" }
  *         therapistId: { type: integer, example: 1 }
  *         patientId: { type: integer, example: 10 }
+ *         tipo_atendimento: { type: string, example: "SOCIAL" }
  */
 
 
