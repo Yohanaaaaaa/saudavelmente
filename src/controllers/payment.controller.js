@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 module.exports = {
   async pay(req, res) {
   try {
-    const { metodo, nome, email, telefone, cpf, cidade, estado } = req.body;
+    const { metodo, nome, email, telefone, cpf } = req.body;
 
     if (!metodo) return res.status(400).json({ message: "metodo é obrigatório" });
     if (!nome || !email || !telefone || !cpf) {

@@ -297,13 +297,7 @@ app.get('/admin/pacientes', adminController.listPatients);
  *                 example: 5598999999999
  *               cpf:
  *                 type: string
- *                 example: 12345678900
- *               cidade:
- *                 type: string
- *                 example: São Luís
- *               estado:
- *                 type: string
- *                 example: MA
+ *                 example: 05537888092
  *     responses:
  *       201:
  *         description: PIX gerado com sucesso
