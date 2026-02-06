@@ -1,15 +1,15 @@
 ### Listar profissionais
-GET http://localhost:3000/profissionais
+GET http://localhost:3007/profissionais
 Accept: application/json
 
 ### Criar paciente
-POST http://localhost:3000/pacientes
+POST http://localhost:3007/pacientes
 Content-Type: application/json
 
 {
   "nomeCompleto": "João da Silva",
-  "email": "joao@email.com",
-  "cpf": "123.456.789-00",
+  "email": "joao5@email.com",
+  "cpf": "123.456.789-66",
   "celular": "98999999999",
   "idade": 25,
   "cidade": "São Luís",
@@ -17,7 +17,7 @@ Content-Type: application/json
 }
 
 ### Criar atendimento
-POST http://localhost:3000/atendimentos
+POST http://localhost:3007/atendimentos
 Content-Type: application/json
 
 {
@@ -28,18 +28,98 @@ Content-Type: application/json
   "tipo_atendimento": "SOCIAL"
 }
 
+### listar atendimento pendentes
+GET http://localhost:3007/atendimentos/pendentes
+Content-Type: application/json
+
+### admin solitacoes
+GET http://localhost:3007/admin/solicitacoes
+Content-Type: application/json
+
+### admin atendimentos
+GET http://localhost:3007/admin/atendimentos  
+Content-Type: application/json
+
+### admin profissionais
+GET http://localhost:3007/admin/profissionais  
+Content-Type: application/json
+
+### admin pacientes
+GET http://localhost:3007/admin/pacientes  
+Content-Type: application/json
+
+### dashboard paciente
+GET http://localhost:3007/dashboard/paciente/1 
+Content-Type: application/json
+
+### dashboard PROFISSIONAL
+GET http://localhost:3007/dashboard/profissional/1 
+Content-Type: application/json
+
+### atualizar PROFISSIONAL
+PUT http://localhost:3007/profissional/1 
+Content-Type: application/json
+
+{
+  "nomeCompleto": "Maria Oliveira",
+  "celular": "98988887776",
+  "horarioDisponivel": "Seg–Sex 08:00–18:00",
+  "tipo_atendimento": "SOCIAL",
+  "abordagem_e_experiencia": "TCC, 5 anos de experiência",
+  "numero_registro": "CRP 06/12345",
+  "pix": "maria@pix.com",
+  "cpf": "123.456.789-05"
+}
+
+### atualizar PACIENTE
+PUT http://localhost:3007/paciente/1 
+Content-Type: application/json
+
+{
+  "nomeCompleto": "João da Silva",
+  "cpf": "123.456.789-68",
+  "celular": "98999999999",
+  "idade": 25,
+  "cidade": "São Luís",
+  "estado": "MA"
+}
+
 ### Criar terapeuta
 POST http://localhost:3007/profissionais
 Content-Type: application/json
 
 {
   "nomeCompleto": "Maria Oliveira",
-  "email": "maria.oliveira2@email.com",
+  "email": "maria.oliveira3@email.com",
   "celular": "98988887777",
   "horarioDisponivel": "Seg–Sex 08:00–18:00",
   "tipo_atendimento": "SOCIAL",
   "abordagem_e_experiencia": "TCC, 5 anos de experiência",
   "numero_registro": "CRP 06/12345",
   "pix": "maria@pix.com",
-  "cpf": "123.456.789-01"
+  "cpf": "123.456.789-02"
+}
+
+### Criar terapeuta
+POST http://localhost:3007/pay
+Content-Type: application/json
+
+{
+  "metodo": "pix",
+  "nome": "João Silva",
+  "email": "joao@email.com",
+  "telefone": "5598999999999",
+  "cpf": "61629859389",
+  "cidade": "São Luís",
+  "estado": "MA"
+}
+
+### LOGIN
+POST http://localhost:3007/auth/login
+Content-Type: application/json
+
+{
+  "email": "maria.oliveira3@email.com",
+  "cpf": "123.456.789-02",
+  "tipo": "THERAPIST"
 }

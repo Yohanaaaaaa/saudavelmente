@@ -41,20 +41,17 @@ module.exports = {
       const atendimentos = await prisma.appointment.findMany({
         where: {
           patientId: Number(pacienteid)
-        },
-        orderBy: {
-          data: 'asc'
         }
       });
 
       
       const realizados = atendimentos.filter(
-        a => a.status === 'aprovado'
+        a => a.status === 'APROVADO'
       );
 
       
       const aRealizar = atendimentos.filter(
-        a => a.status === 'pendente'
+        a => a.status === 'PENDENTE'
       );
 
       return res.json({

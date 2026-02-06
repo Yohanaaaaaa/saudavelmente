@@ -11,7 +11,7 @@ module.exports = {
     descricao,
     horario_atendimento,
     status: 'PENDENTE',
-    data_atendimento: "HOJE",
+    data_atendimento: "x",
 
     patient: {
       connect: { id: patientId }
@@ -51,7 +51,7 @@ module.exports = {
       where: { status: 'PENDENTE' },
       include: {
         therapist: true,
-        user: true
+        patient: true
       }
     });
 

@@ -38,6 +38,7 @@ module.exports = {
     });
 
     const customerData = await customerResponse.json();
+    console.log("Customer Response:", customerData);
     const customerId = customerData?.data?.id;
 
     if (!customerId) {
@@ -60,6 +61,7 @@ module.exports = {
     });
 
     const orderData = await orderResponse.json();
+    console.log("Order Response:", orderData);
     const orderId = orderData?.data?.id;
 
     if (!orderId) {
@@ -84,6 +86,7 @@ module.exports = {
     });
 
     const pixData = await pixResponse.json();
+    console.log("PIX Response:", pixData);
 
     return res.status(201).json({
       pix: pixData?.data

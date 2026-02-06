@@ -35,6 +35,7 @@ module.exports = {
 
   async list(req, res) {
     const therapists = await prisma.therapist.findMany();
+    console.log(therapists);
     res.json(therapists);
   },
 
@@ -45,19 +46,16 @@ module.exports = {
       const atendimentos = await prisma.appointment.findMany({
         where: {
           therapistId: Number(profissionalid)
-        },
-        orderBy: {
-          data: 'asc'
         }
       });
 
       const aRealizar = atendimentos.filter(
-        a => a.status === 'pendente'
+        a => a.status === 'PENDENTE'
       );
 
       
       const realizados = atendimentos.filter(
-        a => a.status === 'aprovado'
+        a => a.status === 'APROVADO'
       ).length;
 
       return res.json({
