@@ -11,7 +11,7 @@ module.exports = {
       return res.status(400).json({ message: "nome, email, telefone e cpf são obrigatórios" });
     }
 
-    const token = process.env.APPMAX_TOKEN;
+    const token = "0F6CA998-B737844E-4C736A0D-F08E1F40";
 
     const [firstname, ...rest] = String(nome).trim().split(/\s+/);
     const lastname = rest.join(" ");

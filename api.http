@@ -108,9 +108,7 @@ Content-Type: application/json
   "nome": "João Silva",
   "email": "joao@email.com",
   "telefone": "5598999999999",
-  "cpf": "61629859389",
-  "cidade": "São Luís",
-  "estado": "MA"
+  "cpf": "61629859389"
 }
 
 ### LOGIN
