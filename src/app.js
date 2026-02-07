@@ -297,7 +297,7 @@ app.get('/admin/pacientes', adminController.listPatients);
  *                 example: 5598999999999
  *               cpf:
  *                 type: string
- *                 example: 05537888092
+ *                 example: 31150286016
  *     responses:
  *       201:
  *         description: PIX gerado com sucesso
