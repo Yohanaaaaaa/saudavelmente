@@ -57,18 +57,11 @@ GET http://localhost:3007/dashboard/profissional/1
 Content-Type: application/json
 
 ### atualizar PROFISSIONAL
-PUT http://localhost:3007/profissional/1 
+PUT http://localhost:3007/profissional/5
 Content-Type: application/json
 
 {
-  "nomeCompleto": "Maria Oliveira",
-  "celular": "98988887776",
-  "horarioDisponivel": "Seg–Sex 08:00–18:00",
-  "tipo_atendimento": "SOCIAL",
-  "abordagem_e_experiencia": "TCC, 5 anos de experiência",
-  "numero_registro": "CRP 06/12345",
-  "pix": "maria@pix.com",
-  "cpf": "123.456.789-05"
+  "cpf": "123.456.789-09"
 }
 
 ### atualizar PACIENTE
@@ -116,7 +109,19 @@ POST http://localhost:3007/auth/login
 Content-Type: application/json
 
 {
-  "email": "maria.oliveira3@email.com",
-  "cpf": "123.456.789-02",
-  "tipo": "THERAPIST"
+  "email": "vitoria@teste.com.br",
+  "cpf": "123.123.123-11",
+  "tipo": "PATIENT"
 }
+
+### Verificar status pagamento
+GET http://localhost:3007/pay/status/106964096
+Content-Type: application/json
+
+### Buscar Paciente por ID
+GET http://localhost:3007/pacientes/1
+Content-Type: application/json
+
+### Buscar Profissional por ID
+GET http://localhost:3007/profissionais/5
+Content-Type: application/json

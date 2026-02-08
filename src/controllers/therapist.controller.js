@@ -39,6 +39,20 @@ module.exports = {
     res.json(therapists);
   },
 
+  async findById(req, res) {
+    const { id } = req.params;
+
+    const therapist = await prisma.therapist.findUnique({
+      where: {
+        id: Number(id)
+      }
+    });
+
+    if (!therapist) return res.status(404).json({ error: 'Therapist not found' });
+
+    res.json(therapist);
+  },
+
   async dashboardProfissional(req, res) {
     const { profissionalid } = req.params;
 
@@ -53,15 +67,18 @@ module.exports = {
         a => a.status === 'PENDENTE'
       );
 
-      
+
       const realizados = atendimentos.filter(
         a => a.status === 'APROVADO'
       ).length;
 
+      const valorAReceber = realizados * 50;
+
       return res.json({
         profissionalId: profissionalid,
         aRealizar,
-        realizados
+        realizados,
+        valorAReceber
       });
 
     } catch (error) {

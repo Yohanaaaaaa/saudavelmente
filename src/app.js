@@ -154,6 +154,26 @@ app.post('/pacientes', patientController.create);
  */
 app.get('/pacientes', patientController.list);
 
+/**
+ * @swagger
+ * /pacientes/{id}:
+ *   get:
+ *     summary: Buscar paciente por ID
+ *     tags: [Pacientes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Dados do paciente
+ *       404:
+ *         description: Paciente não encontrado
+ */
+app.get('/pacientes/:id', patientController.findById);
+
 
 /**
  * @swagger
@@ -184,6 +204,26 @@ app.post('/profissionais', therapistController.create);
  *         description: Lista de profissionais
  */
 app.get('/profissionais', therapistController.list);
+
+/**
+ * @swagger
+ * /profissionais/{id}:
+ *   get:
+ *     summary: Buscar profissional por ID
+ *     tags: [Profissionais]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Dados do profissional
+ *       404:
+ *         description: Profissional não encontrado
+ */
+app.get('/profissionais/:id', therapistController.findById);
 
 /**
  * @swagger
@@ -307,6 +347,28 @@ app.get('/admin/pacientes', adminController.listPatients);
  *         description: Erro interno ao gerar pagamento
  */
 app.post('/pay', paymentController.pay);
+
+/**
+ * @swagger
+ * /pay/status/{orderId}:
+ *   get:
+ *     summary: Verificar status do pagamento
+ *     tags: [Pagamento]
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Status do pagamento retornado
+ *       400:
+ *         description: orderId não fornecido
+ *       500:
+ *         description: Erro interno
+ */
+app.get('/pay/status/:orderId', paymentController.checkPaymentStatus);
 
 
 /**

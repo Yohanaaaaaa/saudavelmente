@@ -34,6 +34,20 @@ module.exports = {
     res.json(patients);
   },
 
+  async findById(req, res) {
+    const { id } = req.params;
+
+    const patient = await prisma.patient.findUnique({
+      where: {
+        id: Number(id)
+      }
+    });
+
+    if (!patient) return res.status(404).json({ error: 'Patient not found' });
+
+    res.json(patient);
+  },
+
   async dashboardPaciente(req, res) {
     const { pacienteid } = req.params;
 
@@ -44,12 +58,12 @@ module.exports = {
         }
       });
 
-      
+
       const realizados = atendimentos.filter(
         a => a.status === 'APROVADO'
       );
 
-      
+
       const aRealizar = atendimentos.filter(
         a => a.status === 'PENDENTE'
       );
