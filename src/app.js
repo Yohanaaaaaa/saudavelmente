@@ -416,7 +416,7 @@ app.get('/dashboard/profissional/:profissionalid', therapistController.dashboard
  * /profissional/{therapistid}:
  *   put:
  *     summary: Atualizar profissional
- *     tags: [Profissional]
+ *     tags: [Profissionais]
  *     parameters:
  *       - in: path
  *         name: therapistid
@@ -442,7 +442,7 @@ app.put('/profissional/:therapistid', therapistController.updateByTherapist);
  * /paciente/{patientid}:
  *   put:
  *     summary: Atualizar paciente
- *     tags: [Paciente]
+ *     tags: [Pacientes]
  *     parameters:
  *       - in: path
  *         name: patientid
