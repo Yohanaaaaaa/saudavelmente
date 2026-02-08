@@ -99,6 +99,26 @@ module.exports = {
         message: 'Erro ao atualizar dados do paciente'
       });
     }
+  },
+
+  async delete(req, res) {
+    const { patientid } = req.params;
+
+    try {
+      await prisma.patient.delete({
+        where: {
+          id: Number(patientid)
+        }
+      });
+
+      return res.status(204).send();
+
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        message: 'Erro ao deletar paciente'
+      });
+    }
   }
 
 

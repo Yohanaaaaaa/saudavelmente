@@ -439,6 +439,28 @@ app.put('/profissional/:therapistid', therapistController.updateByTherapist);
 
 /**
  * @swagger
+ * /profissional/{therapistid}:
+ *   delete:
+ *     summary: Deletar profissional
+ *     tags: [Profissionais]
+ *     parameters:
+ *       - in: path
+ *         name: therapistid
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       204:
+ *         description: Profissional deletado
+ *       404:
+ *         description: Profissional não encontrado
+ *       500:
+ *         description: Erro interno
+ */
+app.delete('/profissional/:therapistid', therapistController.delete);
+
+/**
+ * @swagger
  * /paciente/{patientid}:
  *   put:
  *     summary: Atualizar paciente
@@ -462,6 +484,28 @@ app.put('/profissional/:therapistid', therapistController.updateByTherapist);
  *         description: Paciente não encontrado
  */
 app.put('/paciente/:patientid', patientController.updateByPatient);
+
+/**
+ * @swagger
+ * /paciente/{patientid}:
+ *   delete:
+ *     summary: Deletar paciente
+ *     tags: [Pacientes]
+ *     parameters:
+ *       - in: path
+ *         name: patientid
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       204:
+ *         description: Paciente deletado
+ *       404:
+ *         description: Paciente não encontrado
+ *       500:
+ *         description: Erro interno
+ */
+app.delete('/paciente/:patientid', patientController.delete);
 
 
 module.exports = app;

@@ -108,5 +108,25 @@ module.exports = {
         message: 'Erro ao atualizar dados do profissional'
       });
     }
+  },
+
+  async delete(req, res) {
+    const { therapistid } = req.params;
+
+    try {
+      await prisma.therapist.delete({
+        where: {
+          id: Number(therapistid)
+        }
+      });
+
+      return res.status(204).send();
+
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        message: 'Erro ao deletar profissional'
+      });
+    }
   }
 };

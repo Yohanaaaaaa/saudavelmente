@@ -125,3 +125,11 @@ Content-Type: application/json
 ### Buscar Profissional por ID
 GET http://localhost:3007/profissionais/5
 Content-Type: application/json
+
+### Deletar Paciente
+DELETE http://localhost:3007/paciente/1
+Content-Type: application/json
+
+### Deletar Profissional
+DELETE http://localhost:3007/profissional/1
+Content-Type: application/json
