@@ -40,7 +40,7 @@ const paymentController = require('./controllers/payment.controller');
  *           example: "user@email.com"
  *         cpf:
  *           type: string
- *           example: "12345678900"
+ *           example: "123.456.789-00"
  *         tipo:
  *           type: string
  *           enum:
