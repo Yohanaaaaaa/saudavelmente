@@ -50,7 +50,8 @@ module.exports = {
       return res.status(401).json({ message: 'Credenciais inválidas' });
     }
 
-    const cpfValido = user.cpf == cpf;
+    const cleanCpf = (str) => String(str).replace(/\D/g, '');
+    const cpfValido = cleanCpf(user.cpf) === cleanCpf(cpf);
 
     if (!cpfValido) {
       return res.status(401).json({ message: 'Credenciais inválidas' });

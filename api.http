@@ -8,8 +8,8 @@ Content-Type: application/json
 
 {
   "nomeCompleto": "João da Silva",
-  "email": "joao5@email.com",
-  "cpf": "123.456.789-66",
+  "email": "joao6@email.com",
+  "cpf": "123.456.789-62",
   "celular": "98999999999",
   "idade": 25,
   "cidade": "São Luís",
@@ -110,7 +110,7 @@ Content-Type: application/json
 
 {
   "email": "vitoria@teste.com.br",
-  "cpf": "123.123.123-11",
+  "cpf": "12312312311",
   "tipo": "PATIENT"
 }
 
@@ -127,7 +127,7 @@ GET http://localhost:3007/profissionais/5
 Content-Type: application/json
 
 ### Deletar Paciente
-DELETE http://localhost:3007/paciente/1
+DELETE http://localhost:3007/paciente/10
 Content-Type: application/json
 
 ### Deletar Profissional
