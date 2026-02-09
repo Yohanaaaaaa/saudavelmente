@@ -7,21 +7,21 @@ module.exports = {
     const { descricao, horario_atendimento, therapistId, patientId, tipo_atendimento } = req.body;
 
     const appointment = await prisma.appointment.create({
-  data: {
-    descricao,
-    horario_atendimento,
-    status: 'PENDENTE',
-    data_atendimento: "x",
+      data: {
+        descricao,
+        horario_atendimento,
+        status: 'PENDENTE',
+        data_atendimento: "x",
 
-    patient: {
-      connect: { id: patientId }
-    },
+        patient: {
+          connect: { id: patientId }
+        },
 
-    therapist: {
-      connect: { id: therapistId }
-    }
-  }
-});
+        therapist: {
+          connect: { id: therapistId }
+        }
+      }
+    });
 
 
     res.status(201).json(appointment);
@@ -34,7 +34,7 @@ module.exports = {
       where: { id: Number(id) },
       include: {
         therapist: true,
-        user: true,
+        patient: true,
         payment: true
       }
     });
@@ -56,5 +56,41 @@ module.exports = {
     });
 
     res.json(pendentes);
+  },
+
+  async update(req, res) {
+    const { id } = req.params;
+    const { status, horario_atendimento, descricao, data_atendimento } = req.body;
+
+    try {
+      const appointment = await prisma.appointment.update({
+        where: { id: Number(id) },
+        data: {
+          status,
+          horario_atendimento,
+          descricao,
+          data_atendimento
+        }
+      });
+
+      return res.json(appointment);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'Erro ao atualizar atendimento' });
+    }
+  },
+
+  async delete(req, res) {
+    const { id } = req.params;
+
+    try {
+      await prisma.appointment.delete({
+        where: { id: Number(id) }
+      });
+
+      return res.status(204).send();
+    } catch (error) {
+      return res.status(500).json({ message: 'Erro ao deletar atendimento' });
+    }
   }
 };
