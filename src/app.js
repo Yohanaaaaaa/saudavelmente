@@ -258,6 +258,63 @@ app.get('/atendimentos/pendentes', appointmentController.listPending);
 
 /**
  * @swagger
+ * /atendimentos/{id}:
+ *   put:
+ *     summary: Atualizar atendimento
+ *     tags: [Atendimentos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *               horario_atendimento:
+ *                 type: string
+ *               descricao:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Atendimento atualizado
+ *       500:
+ *         description: Erro interno
+ */
+app.put('/atendimentos/:id', appointmentController.update);
+
+
+/**
+ * @swagger
+ * /atendimentos/{id}:
+ *   delete:
+ *     summary: Deletar atendimento
+ *     tags: [Atendimentos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: Integer
+ *     responses:
+ *       204:
+ *         description: Atendimento deletado
+ *       404:
+ *         description: Atendimento não encontrado
+ *       500:
+ *         description: Erro interno
+ */
+app.delete('/atendimentos/:id', appointmentController.delete);
+
+
+/**
+ * @swagger
  * /admin/solicitacoes:
  *   get:
  *     summary: Listar solicitações pendentes (status PENDENTE)
