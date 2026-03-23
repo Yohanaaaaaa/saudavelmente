@@ -105,10 +105,41 @@ module.exports = {
     const { patientid } = req.params;
 
     try {
-      await prisma.patient.delete({
-        where: {
-          id: Number(patientid)
+      await prisma.$transaction(async (tx) => {
+        const atendimentos = await tx.appointment.findMany({
+          where: {
+            patientId: Number(patientid)
+          },
+          select: {
+            id: true
+          }
+        });
+
+        const atendimentosIds = atendimentos.map(a => a.id);
+
+        if (atendimentosIds.length > 0) {
+          await tx.payment.deleteMany({
+            where: {
+              appointmentId: {
+                in: atendimentosIds
+              }
+            }
+          });
+
+          await tx.appointment.deleteMany({
+            where: {
+              id: {
+                in: atendimentosIds
+              }
+            }
+          });
         }
+
+        await tx.patient.delete({
+          where: {
+            id: Number(patientid)
+          }
+        });
       });
 
       return res.status(204).send();
