@@ -9,5 +9,5 @@ module.exports = swaggerJsdoc({
     },
     servers: [{ url: process.env.BASE_URL || "https://api.saudavelmente.app.br"   }],
   },
-  apis: ["./src/app.js"],
+  apis: ["./src/app.js", "./src/docs/**/*.js"],
 });

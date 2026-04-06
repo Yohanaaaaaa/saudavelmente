@@ -44,7 +44,8 @@ model Therapist {
   pix                     String
   cpf                     String?         @unique
 
-  appointments Appointment[]
+  appointments  Appointment[]
+  availabilities TherapistAvailability[]
 }
 
 model Admin {
@@ -59,6 +60,7 @@ model Admin {
 enum AppointmentStatus {
   PENDENTE
   APROVADO
+  RECUSADO
   CANCELADO
 }
 
@@ -79,6 +81,24 @@ model Appointment {
   payment Payment?
 
   createdAt DateTime @default(now())
+}
+
+model TherapistAvailability {
+  id          Int      @id @default(autoincrement())
+  date        DateTime
+  startTime   String
+  endTime     String
+  isAvailable Boolean  @default(true)
+  therapistId Int
+
+  therapist Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([therapistId, date])
+  @@index([date, isAvailable])
+  @@unique([therapistId, date, startTime, endTime])
 }
 
 enum PaymentStatus {

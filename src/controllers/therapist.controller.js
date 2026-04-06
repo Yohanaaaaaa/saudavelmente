@@ -1,56 +1,153 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+const THERAPIST_INCLUDE = {
+  availabilities: {
+    orderBy: [
+      { date: 'asc' },
+      { startTime: 'asc' }
+    ]
+  }
+};
+
+function normalizeBoolean(value, defaultValue = true) {
+  if (value === undefined) return defaultValue;
+
+  if (typeof value === 'boolean') return value;
+
+  if (typeof value === 'string') {
+    if (value.toLowerCase() === 'true') return true;
+    if (value.toLowerCase() === 'false') return false;
+  }
+
+  return Boolean(value);
+}
+
+function normalizeAvailabilities(input) {
+  if (!Array.isArray(input)) {
+    return { data: null, error: null };
+  }
+
+  const mapped = [];
+
+  for (const item of input) {
+    if (!item || typeof item !== 'object') continue;
+
+    const date = new Date(`${item.date}T00:00:00.000Z`);
+    if (Number.isNaN(date.getTime()) || !item.startTime || !item.endTime) {
+      return {
+        data: null,
+        error: 'Cada disponibilidade deve conter date (YYYY-MM-DD), startTime e endTime.'
+      };
+    }
+
+    mapped.push({
+      date,
+      startTime: item.startTime,
+      endTime: item.endTime,
+      isAvailable: normalizeBoolean(item.isAvailable, true)
+    });
+  }
+
+  return {
+    data: mapped.length > 0 ? mapped : null,
+    error: null
+  };
+}
+
 module.exports = {
 
   async create(req, res) {
-    const {
-      nomeCompleto,
-      email,
-      horarioDisponivel,
-      celular,
-      numero_registro,
-      abordagem_e_experiencia,
-      pix,
-      cpf
-    } = req.body;
-
-    const therapist = await prisma.therapist.create({
-      data: {
+    try {
+      const {
         nomeCompleto,
         email,
-        celular,
         horarioDisponivel,
-        tipo_atendimento: "SOCIAL",
-        verificacao_registro: false,
+        celular,
         numero_registro,
         abordagem_e_experiencia,
         pix,
-        cpf
-      }
-    });
+        cpf,
+        disponibilidades,
+        availabilities
+      } = req.body;
 
-    res.status(201).json(therapist);
+      const { data: availabilityData, error } = normalizeAvailabilities(
+        disponibilidades || availabilities
+      );
+
+      if (error) {
+        return res.status(400).json({ message: error });
+      }
+
+      const therapist = await prisma.therapist.create({
+        data: {
+          nomeCompleto,
+          email,
+          celular,
+          horarioDisponivel,
+          tipo_atendimento: 'SOCIAL',
+          verificacao_registro: false,
+          numero_registro,
+          abordagem_e_experiencia,
+          pix,
+          cpf,
+          ...(availabilityData
+            ? {
+              availabilities: {
+                create: availabilityData
+              }
+            }
+            : {})
+        },
+        include: THERAPIST_INCLUDE
+      });
+
+      return res.status(201).json(therapist);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        message: 'Erro ao criar profissional.'
+      });
+    }
   },
 
   async list(req, res) {
-    const therapists = await prisma.therapist.findMany();
-    console.log(therapists);
-    res.json(therapists);
+    try {
+      const therapists = await prisma.therapist.findMany({
+        include: THERAPIST_INCLUDE,
+        orderBy: { id: 'asc' }
+      });
+
+      return res.json(therapists);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        message: 'Erro ao listar profissionais.'
+      });
+    }
   },
 
   async findById(req, res) {
     const { id } = req.params;
 
-    const therapist = await prisma.therapist.findUnique({
-      where: {
-        id: Number(id)
-      }
-    });
+    try {
+      const therapist = await prisma.therapist.findUnique({
+        where: {
+          id: Number(id)
+        },
+        include: THERAPIST_INCLUDE
+      });
 
-    if (!therapist) return res.status(404).json({ error: 'Therapist not found' });
+      if (!therapist) return res.status(404).json({ error: 'Therapist not found' });
 
-    res.json(therapist);
+      return res.json(therapist);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        message: 'Erro ao buscar profissional.'
+      });
+    }
   },
 
   async dashboardProfissional(req, res) {
@@ -64,12 +161,11 @@ module.exports = {
       });
 
       const aRealizar = atendimentos.filter(
-        a => a.status === 'PENDENTE'
+        (a) => a.status === 'PENDENTE'
       );
 
-
       const realizados = atendimentos.filter(
-        a => a.status === 'APROVADO'
+        (a) => a.status === 'APROVADO'
       ).length;
 
       const valorAReceber = realizados * 50;
@@ -88,6 +184,7 @@ module.exports = {
       });
     }
   },
+
   async updateByTherapist(req, res) {
     const { therapistid } = req.params;
     const data = req.body;
@@ -97,7 +194,8 @@ module.exports = {
         where: {
           id: Number(therapistid)
         },
-        data
+        data,
+        include: THERAPIST_INCLUDE
       });
 
       return res.json(terapeutaAtualizado);
@@ -112,18 +210,53 @@ module.exports = {
 
   async delete(req, res) {
     const { therapistid } = req.params;
+    const therapistId = Number(therapistid);
+
+    if (!Number.isInteger(therapistId) || therapistId <= 0) {
+      return res.status(400).json({
+        message: 'ID de profissional invalido'
+      });
+    }
 
     try {
-      await prisma.therapist.delete({
-        where: {
-          id: Number(therapistid)
+      await prisma.$transaction(async (tx) => {
+        const appointments = await tx.appointment.findMany({
+          where: { therapistId },
+          select: { id: true }
+        });
+
+        const appointmentIds = appointments.map((a) => a.id);
+
+        if (appointmentIds.length > 0) {
+          await tx.payment.deleteMany({
+            where: {
+              appointmentId: { in: appointmentIds }
+            }
+          });
+
+          await tx.appointment.deleteMany({
+            where: {
+              id: { in: appointmentIds }
+            }
+          });
         }
+
+        await tx.therapist.delete({
+          where: { id: therapistId }
+        });
       });
 
       return res.status(204).send();
 
     } catch (error) {
       console.error(error);
+
+      if (error.code === 'P2025') {
+        return res.status(404).json({
+          message: 'Profissional nao encontrado'
+        });
+      }
+
       return res.status(500).json({
         message: 'Erro ao deletar profissional'
       });

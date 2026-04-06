@@ -133,3 +133,65 @@ Content-Type: application/json
 ### Deletar Profissional
 DELETE http://localhost:3007/profissional/1
 Content-Type: application/json
+
+### Criar solicitacao (novo fluxo)
+POST http://localhost:3007/solicitacoes
+Content-Type: application/json
+
+{
+  "descricao": "Solicitacao de sessao",
+  "horario_atendimento": "2026-05-10T14:00:00.000Z",
+  "therapistId": 1,
+  "patientId": 1
+}
+
+### Listar solicitacoes
+GET http://localhost:3007/solicitacoes
+Content-Type: application/json
+
+### Buscar solicitacao por ID
+GET http://localhost:3007/solicitacoes/1
+Content-Type: application/json
+
+### Aprovar solicitacao
+PATCH http://localhost:3007/solicitacoes/1/aprovar
+Content-Type: application/json
+
+### Recusar solicitacao
+PATCH http://localhost:3007/solicitacoes/2/recusar
+Content-Type: application/json
+
+### Criar disponibilidade para profissional
+POST http://localhost:3007/profissionais/1/disponibilidades
+Content-Type: application/json
+
+{
+  "date": "2026-05-10",
+  "startTime": "14:00",
+  "endTime": "15:00",
+  "isAvailable": true
+}
+
+### Listar disponibilidades do profissional
+GET http://localhost:3007/profissionais/1/disponibilidades
+Content-Type: application/json
+
+### Buscar disponibilidade por ID
+GET http://localhost:3007/disponibilidades/1
+Content-Type: application/json
+
+### Atualizar disponibilidade
+PUT http://localhost:3007/disponibilidades/1
+Content-Type: application/json
+
+{
+  "isAvailable": false
+}
+
+### Deletar disponibilidade
+DELETE http://localhost:3007/disponibilidades/1
+Content-Type: application/json
+
+### Profissionais disponiveis por data
+GET http://localhost:3007/profissionais/disponiveis?date=2026-05-10
+Content-Type: application/json

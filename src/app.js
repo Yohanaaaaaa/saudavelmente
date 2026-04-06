@@ -15,6 +15,7 @@ const patientController = require('./controllers/patient.controller');
 const appointmentController = require('./controllers/appointment.controller');
 const adminController = require('./controllers/admin.controller');
 const paymentController = require('./controllers/payment.controller');
+const availabilityController = require('./controllers/availability.controller');
 
 /**
  * @swagger
@@ -204,6 +205,12 @@ app.post('/profissionais', therapistController.create);
  *         description: Lista de profissionais
  */
 app.get('/profissionais', therapistController.list);
+app.get('/profissionais/disponiveis', availabilityController.listAvailableProfessionalsByDate);
+app.post('/profissionais/:therapistId/disponibilidades', availabilityController.create);
+app.get('/profissionais/:therapistId/disponibilidades', availabilityController.listByTherapist);
+app.get('/disponibilidades/:id', availabilityController.findById);
+app.put('/disponibilidades/:id', availabilityController.update);
+app.delete('/disponibilidades/:id', availabilityController.delete);
 
 /**
  * @swagger
@@ -224,6 +231,14 @@ app.get('/profissionais', therapistController.list);
  *         description: Profissional não encontrado
  */
 app.get('/profissionais/:id', therapistController.findById);
+app.post('/solicitacoes', appointmentController.create);
+app.get('/solicitacoes', appointmentController.list);
+app.get('/solicitacoes/pendentes', appointmentController.listPending);
+app.get('/solicitacoes/:id', appointmentController.getById);
+app.put('/solicitacoes/:id', appointmentController.update);
+app.delete('/solicitacoes/:id', appointmentController.delete);
+app.patch('/solicitacoes/:id/aprovar', appointmentController.approve);
+app.patch('/solicitacoes/:id/recusar', appointmentController.reject);
 
 /**
  * @swagger
@@ -242,6 +257,7 @@ app.get('/profissionais/:id', therapistController.findById);
  *         description: Atendimento criado
  */
 app.post('/atendimentos', appointmentController.create);
+app.get('/atendimentos', appointmentController.list);
 
 /**
  * @swagger
@@ -254,6 +270,9 @@ app.post('/atendimentos', appointmentController.create);
  *         description: Lista de atendimentos pendentes
  */
 app.get('/atendimentos/pendentes', appointmentController.listPending);
+app.get('/atendimentos/:id', appointmentController.getById);
+app.patch('/atendimentos/:id/aprovar', appointmentController.approve);
+app.patch('/atendimentos/:id/recusar', appointmentController.reject);
 
 
 /**
