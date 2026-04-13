@@ -16,6 +16,7 @@ const appointmentController = require('./controllers/appointment.controller');
 const adminController = require('./controllers/admin.controller');
 const paymentController = require('./controllers/payment.controller');
 const availabilityController = require('./controllers/availability.controller');
+const authMiddleware = require('./middlewares/auth.middleware');
 
 /**
  * @swagger
@@ -47,6 +48,7 @@ const availabilityController = require('./controllers/availability.controller');
  *           enum:
  *             - PATIENT
  *             - THERAPIST
+ *             - ADMIN
  *           example: "PATIENT"
  *     PatientCreate:
  *       type: object
@@ -101,7 +103,7 @@ const availabilityController = require('./controllers/availability.controller');
  *       400:
  *         description: Usuário já existe
  */
-app.post('/auth/register', authController.register);
+app.post('/auth/register', authMiddleware, authController.register);
 
 /**
  * @swagger
@@ -109,6 +111,7 @@ app.post('/auth/register', authController.register);
  *   post:
  *     summary: Login (retorna token JWT)
  *     tags: [Auth]
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -117,13 +120,15 @@ app.post('/auth/register', authController.register);
  *             $ref: '#/components/schemas/AuthLogin'
  *     responses:
  *       200:
- *         description: Token gerado
+ *         description: Token gerado com dados basicos do usuario
  *       400:
  *         description: Tipo de usuário inválido
  *       401:
  *         description: Credenciais inválidas
  */
 app.post('/auth/login', authController.login);
+
+app.use(authMiddleware);
 
 /**
  * @swagger
@@ -445,7 +450,6 @@ app.post('/pay', paymentController.pay);
  *         description: Erro interno
  */
 app.get('/pay/status/:orderId', paymentController.checkPaymentStatus);
-
 
 /**
  * @swagger

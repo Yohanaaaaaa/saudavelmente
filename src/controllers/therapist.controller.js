@@ -1,4 +1,9 @@
 const { PrismaClient } = require('@prisma/client');
+const {
+  parsePagination,
+  buildPaginatedResponse
+} = require('../utils/pagination');
+
 const prisma = new PrismaClient();
 
 const THERAPIST_INCLUDE = {
@@ -55,6 +60,29 @@ function normalizeAvailabilities(input) {
   };
 }
 
+function getUniqueConstraintMessage(error, fallbackMessage) {
+  const target = Array.isArray(error?.meta?.target) ? error.meta.target : [];
+
+  if (target.includes('email')) {
+    return 'Ja existe profissional com este email.';
+  }
+
+  if (target.includes('cpf')) {
+    return 'Ja existe profissional com este CPF.';
+  }
+
+  if (
+    target.includes('therapistId') &&
+    target.includes('date') &&
+    target.includes('startTime') &&
+    target.includes('endTime')
+  ) {
+    return 'Disponibilidade duplicada para este profissional na mesma data e horario.';
+  }
+
+  return fallbackMessage;
+}
+
 module.exports = {
 
   async create(req, res) {
@@ -106,6 +134,16 @@ module.exports = {
       return res.status(201).json(therapist);
     } catch (error) {
       console.error(error);
+
+      if (error.code === 'P2002') {
+        return res.status(409).json({
+          message: getUniqueConstraintMessage(
+            error,
+            'Ja existe registro com dados unicos informados.'
+          )
+        });
+      }
+
       return res.status(500).json({
         message: 'Erro ao criar profissional.'
       });
@@ -114,12 +152,23 @@ module.exports = {
 
   async list(req, res) {
     try {
-      const therapists = await prisma.therapist.findMany({
-        include: THERAPIST_INCLUDE,
-        orderBy: { id: 'asc' }
+      const { page, pageSize, skip, take } = parsePagination(req.query, {
+        defaultPageSize: 10
       });
 
-      return res.json(therapists);
+      const [total, therapists] = await prisma.$transaction([
+        prisma.therapist.count(),
+        prisma.therapist.findMany({
+          include: THERAPIST_INCLUDE,
+          orderBy: { id: 'asc' },
+          skip,
+          take
+        })
+      ]);
+
+      return res.json(
+        buildPaginatedResponse(therapists, total, page, pageSize)
+      );
     } catch (error) {
       console.error(error);
       return res.status(500).json({
@@ -202,6 +251,22 @@ module.exports = {
 
     } catch (error) {
       console.error(error);
+
+      if (error.code === 'P2025') {
+        return res.status(404).json({
+          message: 'Profissional nao encontrado'
+        });
+      }
+
+      if (error.code === 'P2002') {
+        return res.status(409).json({
+          message: getUniqueConstraintMessage(
+            error,
+            'Ja existe registro com dados unicos informados.'
+          )
+        });
+      }
+
       return res.status(500).json({
         message: 'Erro ao atualizar dados do profissional'
       });

@@ -2,6 +2,27 @@
  * @swagger
  * components:
  *   schemas:
+ *     PaginationMeta:
+ *       type: object
+ *       properties:
+ *         page:
+ *           type: integer
+ *           example: 1
+ *         pageSize:
+ *           type: integer
+ *           example: 10
+ *         total:
+ *           type: integer
+ *           example: 57
+ *         totalPages:
+ *           type: integer
+ *           example: 6
+ *         hasNextPage:
+ *           type: boolean
+ *           example: true
+ *         hasPreviousPage:
+ *           type: boolean
+ *           example: false
  *     AppointmentStatus:
  *       type: object
  *       required:
@@ -95,7 +116,16 @@
  *         createdAt:
  *           type: string
  *           format: date-time
- *     TherapistAvailabilityCreateRequest:
+ *     PaginatedSolicitationResponse:
+ *       type: object
+ *       properties:
+ *         data:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/SolicitationResponse'
+ *         pagination:
+ *           $ref: '#/components/schemas/PaginationMeta'
+ *     AvailabilityDayItem:
  *       type: object
  *       required:
  *         - date
@@ -114,6 +144,18 @@
  *         isAvailable:
  *           type: boolean
  *           default: true
+ *     TherapistAvailabilityCreateRequest:
+ *       oneOf:
+ *         - $ref: '#/components/schemas/AvailabilityDayItem'
+ *         - type: object
+ *           required:
+ *             - days
+ *           properties:
+ *             days:
+ *               type: array
+ *               minItems: 1
+ *               items:
+ *                 $ref: '#/components/schemas/AvailabilityDayItem'
  *     TherapistAvailabilityUpdateRequest:
  *       type: object
  *       properties:
@@ -156,6 +198,35 @@
  *         updatedAt:
  *           type: string
  *           format: date-time
+ *     PaginatedTherapistAvailabilityResponse:
+ *       type: object
+ *       properties:
+ *         data:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/TherapistAvailabilityResponse'
+ *         pagination:
+ *           $ref: '#/components/schemas/PaginationMeta'
+ *     AvailableProfessionalResponse:
+ *       type: object
+ *       properties:
+ *         therapist:
+ *           type: object
+ *         availabilities:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/TherapistAvailabilityResponse'
+ *     PaginatedAvailableProfessionalResponse:
+ *       type: object
+ *       properties:
+ *         date:
+ *           type: string
+ *         data:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/AvailableProfessionalResponse'
+ *         pagination:
+ *           $ref: '#/components/schemas/PaginationMeta'
  *
  * /solicitacoes:
  *   post:
@@ -177,17 +248,34 @@
  *       400:
  *         description: Dados invalidos
  *   get:
- *     summary: Listar solicitacoes
+ *     summary: Listar solicitacoes (com paginacao e filtros)
  *     tags: [Solicitacoes]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           example: 10
+ *       - in: query
+ *         name: patientId
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: therapistId
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
- *         description: Lista de solicitacoes
+ *         description: Lista paginada de solicitacoes
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/SolicitationResponse'
+ *               $ref: '#/components/schemas/PaginatedSolicitationResponse'
  *
  * /solicitacoes/{id}:
  *   get:
@@ -245,17 +333,34 @@
  *
  * /solicitacoes/pendentes:
  *   get:
- *     summary: Listar solicitacoes pendentes
+ *     summary: Listar solicitacoes pendentes (com paginacao e filtros)
  *     tags: [Solicitacoes]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           example: 10
+ *       - in: query
+ *         name: patientId
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: therapistId
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
- *         description: Lista de solicitacoes pendentes
+ *         description: Lista paginada de solicitacoes pendentes
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/SolicitationResponse'
+ *               $ref: '#/components/schemas/PaginatedSolicitationResponse'
  *
  * /solicitacoes/{id}/aprovar:
  *   patch:
@@ -291,7 +396,7 @@
  *
  * /profissionais/{therapistId}/disponibilidades:
  *   post:
- *     summary: Criar disponibilidade para um profissional
+ *     summary: Criar disponibilidade (unitaria ou em lote por lista de dias)
  *     tags: [Disponibilidades]
  *     parameters:
  *       - in: path
@@ -308,12 +413,8 @@
  *     responses:
  *       201:
  *         description: Disponibilidade criada
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/TherapistAvailabilityResponse'
  *   get:
- *     summary: Listar disponibilidades do profissional
+ *     summary: Listar disponibilidades do profissional (com paginacao)
  *     tags: [Disponibilidades]
  *     parameters:
  *       - in: path
@@ -327,15 +428,23 @@
  *           type: string
  *           example: "2026-05-10"
  *         description: Filtro opcional por data (YYYY-MM-DD)
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           example: 10
  *     responses:
  *       200:
- *         description: Lista de disponibilidades
+ *         description: Lista paginada de disponibilidades
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/TherapistAvailabilityResponse'
+ *               $ref: '#/components/schemas/PaginatedTherapistAvailabilityResponse'
  *
  * /disponibilidades/{id}:
  *   get:
@@ -393,7 +502,7 @@
  *
  * /profissionais/disponiveis:
  *   get:
- *     summary: Listar profissionais disponiveis por data
+ *     summary: Listar profissionais disponiveis por data (com paginacao)
  *     tags: [Disponibilidades]
  *     parameters:
  *       - in: query
@@ -402,27 +511,23 @@
  *         schema:
  *           type: string
  *           example: "2026-05-10"
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           example: 10
  *     responses:
  *       200:
  *         description: Profissionais e horarios disponiveis na data informada
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 date:
- *                   type: string
- *                 professionals:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       therapist:
- *                         type: object
- *                       availabilities:
- *                         type: array
- *                         items:
- *                           $ref: '#/components/schemas/TherapistAvailabilityResponse'
+ *               $ref: '#/components/schemas/PaginatedAvailableProfessionalResponse'
  *       400:
  *         description: date nao informada ou invalida
  */

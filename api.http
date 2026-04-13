@@ -1,111 +1,8 @@
-### Listar profissionais
-GET http://localhost:3007/profissionais
-Accept: application/json
+@baseUrl = http://localhost:3007
+@token = COLE_TOKEN_JWT_AQUI
 
-### Criar paciente
-POST http://localhost:3007/pacientes
-Content-Type: application/json
-
-{
-  "nomeCompleto": "João da Silva",
-  "email": "joao6@email.com",
-  "cpf": "123.456.789-62",
-  "celular": "98999999999",
-  "idade": 25,
-  "cidade": "São Luís",
-  "estado": "MA"
-}
-
-### Criar atendimento
-POST http://localhost:3007/atendimentos
-Content-Type: application/json
-
-{
-  "descricao": "Consulta inicial",
-  "horario_atendimento": "2026-02-01T14:00:00.000Z",
-  "therapistId": 1,
-  "patientId": 1,
-  "tipo_atendimento": "SOCIAL"
-}
-
-### listar atendimento pendentes
-GET http://localhost:3007/atendimentos/pendentes
-Content-Type: application/json
-
-### admin solitacoes
-GET http://localhost:3007/admin/solicitacoes
-Content-Type: application/json
-
-### admin atendimentos
-GET http://localhost:3007/admin/atendimentos  
-Content-Type: application/json
-
-### admin profissionais
-GET http://localhost:3007/admin/profissionais  
-Content-Type: application/json
-
-### admin pacientes
-GET http://localhost:3007/admin/pacientes  
-Content-Type: application/json
-
-### dashboard paciente
-GET http://localhost:3007/dashboard/paciente/1 
-Content-Type: application/json
-
-### dashboard PROFISSIONAL
-GET http://localhost:3007/dashboard/profissional/1 
-Content-Type: application/json
-
-### atualizar PROFISSIONAL
-PUT http://localhost:3007/profissional/5
-Content-Type: application/json
-
-{
-  "cpf": "123.456.789-09"
-}
-
-### atualizar PACIENTE
-PUT http://localhost:3007/paciente/1 
-Content-Type: application/json
-
-{
-  "nomeCompleto": "João da Silva",
-  "cpf": "123.456.789-68",
-  "celular": "98999999999",
-  "idade": 25,
-  "cidade": "São Luís",
-  "estado": "MA"
-}
-
-### Criar terapeuta
-POST http://localhost:3007/profissionais
-Content-Type: application/json
-
-{
-  "nomeCompleto": "Dra. Ana Lima",
-  "email": "ana55@email.com",
-  "celular": "5598999999999",
-  "horarioDisponivel": "Seg-Sex 18:00-21:00",
-  "numero_registro": "CRP 00/00000",
-  "abordagem_e_experiencia": "TCC, 5 anos de experiência...",
-  "pix": "chave-pix@email.com",
-  "cpf": "123.456.789-33"
-}
-
-### Criar terapeuta
-POST http://localhost:3007/pay
-Content-Type: application/json
-
-{
-  "metodo": "pix",
-  "nome": "João Silva",
-  "email": "joao@email.com",
-  "telefone": "5598999999999",
-  "cpf": "61629859389"
-}
-
-### LOGIN
-POST http://localhost:3007/auth/login
+### LOGIN (rota publica)
+POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
@@ -114,29 +11,49 @@ Content-Type: application/json
   "tipo": "PATIENT"
 }
 
-### Verificar status pagamento
-GET http://localhost:3007/pay/status/106964096
+### Criar paciente (protegida)
+POST {{baseUrl}}/pacientes
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
-### Buscar Paciente por ID
-GET http://localhost:3007/pacientes/2
-Content-Type: application/json
+{
+  "nomeCompleto": "Joao da Silva",
+  "email": "joao6@email.com",
+  "cpf": "123.456.789-62",
+  "celular": "98999999999",
+  "idade": 25,
+  "cidade": "Sao Luis",
+  "estado": "MA"
+}
 
-### Buscar Profissional por ID
-GET http://localhost:3007/profissionais/5
-Content-Type: application/json
+### Listar pacientes com paginacao
+GET {{baseUrl}}/pacientes?page=1&pageSize=10
+Authorization: Bearer {{token}}
 
-### Deletar Paciente
-DELETE http://localhost:3007/paciente/2
+### Criar profissional
+POST {{baseUrl}}/profissionais
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
-### Deletar Profissional
-DELETE http://localhost:3007/profissional/1
-Content-Type: application/json
+{
+  "nomeCompleto": "Dra. Ana Lima",
+  "email": "ana55666@email.com",
+  "celular": "5598999999999",
+  "horarioDisponivel": "Seg-Sex 18:00-21:00",
+  "numero_registro": "CRP 00/00000",
+  "abordagem_e_experiencia": "TCC, 5 anos de experiencia...",
+  "pix": "chave-pix@email.com",
+  "cpf": "123.456.789-33"
+}
 
-### Criar solicitacao (novo fluxo)
-POST http://localhost:3007/solicitacoes
+### Listar profissionais com paginacao
+GET {{baseUrl}}/profissionais?page=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### Criar solicitacao
+POST {{baseUrl}}/solicitacoes
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "descricao": "Solicitacao de sessao",
@@ -145,25 +62,26 @@ Content-Type: application/json
   "patientId": 1
 }
 
-### Listar solicitacoes
-GET http://localhost:3007/solicitacoes
-Content-Type: application/json
+### Listar solicitacoes com paginacao e filtro
+GET {{baseUrl}}/solicitacoes?page=1&pageSize=10&patientId=1&therapistId=1
+Authorization: Bearer {{token}}
 
-### Buscar solicitacao por ID
-GET http://localhost:3007/solicitacoes/1
-Content-Type: application/json
+### Listar solicitacoes pendentes com paginacao e filtro
+GET {{baseUrl}}/solicitacoes/pendentes?page=1&pageSize=10&patientId=1&therapistId=1
+Authorization: Bearer {{token}}
 
 ### Aprovar solicitacao
-PATCH http://localhost:3007/solicitacoes/1/aprovar
-Content-Type: application/json
+PATCH {{baseUrl}}/solicitacoes/1/aprovar
+Authorization: Bearer {{token}}
 
 ### Recusar solicitacao
-PATCH http://localhost:3007/solicitacoes/2/recusar
-Content-Type: application/json
+PATCH {{baseUrl}}/solicitacoes/2/recusar
+Authorization: Bearer {{token}}
 
-### Criar disponibilidade para profissional
-POST http://localhost:3007/profissionais/1/disponibilidades
+### Criar disponibilidade unit?ria
+POST {{baseUrl}}/profissionais/1/disponibilidades
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "date": "2026-05-10",
@@ -172,26 +90,48 @@ Content-Type: application/json
   "isAvailable": true
 }
 
-### Listar disponibilidades do profissional
-GET http://localhost:3007/profissionais/1/disponibilidades
+### Criar disponibilidade em lote (lista de dias)
+POST {{baseUrl}}/profissionais/1/disponibilidades
 Content-Type: application/json
-
-### Buscar disponibilidade por ID
-GET http://localhost:3007/disponibilidades/1
-Content-Type: application/json
-
-### Atualizar disponibilidade
-PUT http://localhost:3007/disponibilidades/1
-Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
-  "isAvailable": false
+  "days": [
+    {
+      "date": "2026-05-11",
+      "startTime": "09:00",
+      "endTime": "12:00",
+      "isAvailable": true
+    },
+    {
+      "date": "2026-05-12",
+      "startTime": "13:00",
+      "endTime": "17:00",
+      "isAvailable": true
+    }
+  ]
 }
 
-### Deletar disponibilidade
-DELETE http://localhost:3007/disponibilidades/1
-Content-Type: application/json
+### Listar disponibilidades do profissional com paginacao
+GET {{baseUrl}}/profissionais/1/disponibilidades?page=1&pageSize=10
+Authorization: Bearer {{token}}
 
-### Profissionais disponiveis por data
-GET http://localhost:3007/profissionais/disponiveis?date=2026-05-10
-Content-Type: application/json
+### Profissionais disponiveis por data com paginacao
+GET {{baseUrl}}/profissionais/disponiveis?date=2026-05-10&page=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### Admin - solicitacoes com paginacao e filtros
+GET {{baseUrl}}/admin/solicitacoes?page=1&pageSize=10&patientId=1&therapistId=1
+Authorization: Bearer {{token}}
+
+### Admin - atendimentos com paginacao e filtros
+GET {{baseUrl}}/admin/atendimentos?page=1&pageSize=10&patientId=1&therapistId=1
+Authorization: Bearer {{token}}
+
+### Admin - profissionais com paginacao
+GET {{baseUrl}}/admin/profissionais?page=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### Admin - pacientes com paginacao
+GET {{baseUrl}}/admin/pacientes?page=1&pageSize=10
+Authorization: Bearer {{token}}

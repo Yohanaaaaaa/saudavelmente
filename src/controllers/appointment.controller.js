@@ -3,6 +3,10 @@ const {
   serializeAppointment,
   serializeAppointments
 } = require('../utils/appointment-status');
+const {
+  parsePagination,
+  buildPaginatedResponse
+} = require('../utils/pagination');
 
 const prisma = new PrismaClient();
 
@@ -40,6 +44,47 @@ function normalizeStatus(status) {
   return null;
 }
 
+async function validateAppointmentRelations({ patientId, therapistId }) {
+  const checks = [];
+
+  if (patientId !== undefined) {
+    checks.push(
+      prisma.patient.findUnique({
+        where: { id: patientId },
+        select: { id: true }
+      })
+    );
+  }
+
+  if (therapistId !== undefined) {
+    checks.push(
+      prisma.therapist.findUnique({
+        where: { id: therapistId },
+        select: { id: true }
+      })
+    );
+  }
+
+  const results = await Promise.all(checks);
+  let resultIndex = 0;
+
+  if (patientId !== undefined) {
+    const patient = results[resultIndex++];
+    if (!patient) {
+      return { isValid: false, message: 'Paciente informado nao existe.' };
+    }
+  }
+
+  if (therapistId !== undefined) {
+    const therapist = results[resultIndex++];
+    if (!therapist) {
+      return { isValid: false, message: 'Profissional informado nao existe.' };
+    }
+  }
+
+  return { isValid: true };
+}
+
 module.exports = {
 
   async create(req, res) {
@@ -58,11 +103,28 @@ module.exports = {
         });
       }
 
+      const numericPatientId = parseId(patientId);
+      const numericTherapistId = parseId(therapistId);
+      if (!numericPatientId || !numericTherapistId) {
+        return res.status(400).json({
+          message: 'patientId e therapistId devem ser inteiros positivos.'
+        });
+      }
+
       const dateOnly = data_atendimento || toDateOnly(horario_atendimento);
       if (!dateOnly) {
         return res.status(400).json({
           message: 'horario_atendimento invalido. Utilize um valor de data/hora valido.'
         });
+      }
+
+      const relationValidation = await validateAppointmentRelations({
+        patientId: numericPatientId,
+        therapistId: numericTherapistId
+      });
+
+      if (!relationValidation.isValid) {
+        return res.status(404).json({ message: relationValidation.message });
       }
 
       const appointment = await prisma.appointment.create({
@@ -72,10 +134,10 @@ module.exports = {
           status: 'PENDENTE',
           data_atendimento: dateOnly,
           patient: {
-            connect: { id: Number(patientId) }
+            connect: { id: numericPatientId }
           },
           therapist: {
-            connect: { id: Number(therapistId) }
+            connect: { id: numericTherapistId }
           }
         },
         include: APPOINTMENT_INCLUDE
@@ -87,6 +149,12 @@ module.exports = {
 
       if (error.code === 'P2003') {
         return res.status(400).json({
+          message: 'Paciente ou profissional informado nao existe.'
+        });
+      }
+
+      if (error.code === 'P2025') {
+        return res.status(404).json({
           message: 'Paciente ou profissional informado nao existe.'
         });
       }
@@ -121,12 +189,52 @@ module.exports = {
 
   async list(req, res) {
     try {
-      const appointments = await prisma.appointment.findMany({
-        include: APPOINTMENT_INCLUDE,
-        orderBy: { createdAt: 'desc' }
+      const { patientId, therapistId } = req.query;
+      const { page, pageSize, skip, take } = parsePagination(req.query, {
+        defaultPageSize: 10
       });
 
-      return res.json(serializeAppointments(appointments));
+      const where = {};
+
+      if (patientId !== undefined) {
+        const parsedPatientId = parseId(patientId);
+        if (!parsedPatientId) {
+          return res.status(400).json({
+            message: 'patientId deve ser inteiro positivo.'
+          });
+        }
+        where.patientId = parsedPatientId;
+      }
+
+      if (therapistId !== undefined) {
+        const parsedTherapistId = parseId(therapistId);
+        if (!parsedTherapistId) {
+          return res.status(400).json({
+            message: 'therapistId deve ser inteiro positivo.'
+          });
+        }
+        where.therapistId = parsedTherapistId;
+      }
+
+      const [total, appointments] = await prisma.$transaction([
+        prisma.appointment.count({ where }),
+        prisma.appointment.findMany({
+          where,
+          include: APPOINTMENT_INCLUDE,
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take
+        })
+      ]);
+
+      return res.json(
+        buildPaginatedResponse(
+          serializeAppointments(appointments),
+          total,
+          page,
+          pageSize
+        )
+      );
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: 'Erro ao listar solicitacoes.' });
@@ -135,13 +243,52 @@ module.exports = {
 
   async listPending(req, res) {
     try {
-      const pendentes = await prisma.appointment.findMany({
-        where: { status: 'PENDENTE' },
-        include: APPOINTMENT_INCLUDE,
-        orderBy: { createdAt: 'desc' }
+      const { patientId, therapistId } = req.query;
+      const { page, pageSize, skip, take } = parsePagination(req.query, {
+        defaultPageSize: 10
       });
 
-      return res.json(serializeAppointments(pendentes));
+      const where = { status: 'PENDENTE' };
+
+      if (patientId !== undefined) {
+        const parsedPatientId = parseId(patientId);
+        if (!parsedPatientId) {
+          return res.status(400).json({
+            message: 'patientId deve ser inteiro positivo.'
+          });
+        }
+        where.patientId = parsedPatientId;
+      }
+
+      if (therapistId !== undefined) {
+        const parsedTherapistId = parseId(therapistId);
+        if (!parsedTherapistId) {
+          return res.status(400).json({
+            message: 'therapistId deve ser inteiro positivo.'
+          });
+        }
+        where.therapistId = parsedTherapistId;
+      }
+
+      const [total, pendentes] = await prisma.$transaction([
+        prisma.appointment.count({ where }),
+        prisma.appointment.findMany({
+          where,
+          include: APPOINTMENT_INCLUDE,
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take
+        })
+      ]);
+
+      return res.json(
+        buildPaginatedResponse(
+          serializeAppointments(pendentes),
+          total,
+          page,
+          pageSize
+        )
+      );
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: 'Erro ao listar solicitacoes pendentes.' });
@@ -165,11 +312,31 @@ module.exports = {
       } = req.body;
 
       const data = {};
+      let numericPatientId;
+      let numericTherapistId;
 
       if (descricao !== undefined) data.descricao = descricao;
       if (horario_atendimento !== undefined) data.horario_atendimento = horario_atendimento;
-      if (therapistId !== undefined) data.therapist = { connect: { id: Number(therapistId) } };
-      if (patientId !== undefined) data.patient = { connect: { id: Number(patientId) } };
+
+      if (patientId !== undefined) {
+        numericPatientId = parseId(patientId);
+        if (!numericPatientId) {
+          return res.status(400).json({
+            message: 'patientId deve ser inteiro positivo.'
+          });
+        }
+        data.patient = { connect: { id: numericPatientId } };
+      }
+
+      if (therapistId !== undefined) {
+        numericTherapistId = parseId(therapistId);
+        if (!numericTherapistId) {
+          return res.status(400).json({
+            message: 'therapistId deve ser inteiro positivo.'
+          });
+        }
+        data.therapist = { connect: { id: numericTherapistId } };
+      }
 
       const normalizedStatus = normalizeStatus(status);
       if (normalizedStatus) data.status = normalizedStatus;
@@ -187,6 +354,17 @@ module.exports = {
         });
       }
 
+      if (numericPatientId !== undefined || numericTherapistId !== undefined) {
+        const relationValidation = await validateAppointmentRelations({
+          patientId: numericPatientId,
+          therapistId: numericTherapistId
+        });
+
+        if (!relationValidation.isValid) {
+          return res.status(404).json({ message: relationValidation.message });
+        }
+      }
+
       const appointment = await prisma.appointment.update({
         where: { id: numericId },
         data,
@@ -198,6 +376,13 @@ module.exports = {
       console.error(error);
 
       if (error.code === 'P2025') {
+        const cause = String(error.meta?.cause || '');
+        if (cause.includes('Patient')) {
+          return res.status(404).json({ message: 'Paciente informado nao existe.' });
+        }
+        if (cause.includes('Therapist')) {
+          return res.status(404).json({ message: 'Profissional informado nao existe.' });
+        }
         return res.status(404).json({ message: 'Solicitacao nao encontrada.' });
       }
 

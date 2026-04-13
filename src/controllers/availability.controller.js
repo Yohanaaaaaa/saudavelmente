@@ -1,4 +1,9 @@
 const { PrismaClient } = require('@prisma/client');
+const {
+  parsePagination,
+  buildPaginatedResponse
+} = require('../utils/pagination');
+
 const prisma = new PrismaClient();
 
 function parseId(id) {
@@ -53,6 +58,22 @@ function serializeAvailabilities(availabilities = []) {
   return availabilities.map(serializeAvailability);
 }
 
+function normalizeAvailabilityPayload(body) {
+  if (Array.isArray(body?.days)) {
+    return body.days;
+  }
+
+  if (Array.isArray(body?.disponibilidades)) {
+    return body.disponibilidades;
+  }
+
+  if (Array.isArray(body?.availabilities)) {
+    return body.availabilities;
+  }
+
+  return [body];
+}
+
 module.exports = {
   async create(req, res) {
     const therapistId = parseId(req.params.therapistId);
@@ -60,30 +81,53 @@ module.exports = {
       return res.status(400).json({ message: 'therapistId invalido.' });
     }
 
-    const { date, startTime, endTime, isAvailable = true } = req.body;
-    const normalizedDate = normalizeDate(date);
-
-    if (!normalizedDate || !startTime || !endTime) {
-      return res.status(400).json({
-        message: 'Campos obrigatorios: date (YYYY-MM-DD), startTime e endTime.'
-      });
-    }
-
     try {
-      const availability = await prisma.therapistAvailability.create({
-        data: {
+      const items = normalizeAvailabilityPayload(req.body);
+      if (!Array.isArray(items) || items.length === 0) {
+        return res.status(400).json({
+          message: 'Informe ao menos um item de disponibilidade.'
+        });
+      }
+
+      const dataToCreate = [];
+
+      for (const item of items) {
+        const normalizedDate = normalizeDate(item?.date);
+        if (!normalizedDate || !item?.startTime || !item?.endTime) {
+          return res.status(400).json({
+            message: 'Cada item deve conter date (YYYY-MM-DD), startTime e endTime.'
+          });
+        }
+
+        dataToCreate.push({
           therapistId,
           date: normalizedDate,
-          startTime,
-          endTime,
-          isAvailable: normalizeBoolean(isAvailable, true)
-        },
-        include: {
-          therapist: true
-        }
-      });
+          startTime: item.startTime,
+          endTime: item.endTime,
+          isAvailable: normalizeBoolean(item.isAvailable, true)
+        });
+      }
 
-      return res.status(201).json(serializeAvailability(availability));
+      const created = await prisma.$transaction(
+        dataToCreate.map((item) =>
+          prisma.therapistAvailability.create({
+            data: item,
+            include: {
+              therapist: true
+            }
+          })
+        )
+      );
+
+      if (created.length === 1) {
+        return res.status(201).json(serializeAvailability(created[0]));
+      }
+
+      return res.status(201).json({
+        message: 'Disponibilidades criadas com sucesso.',
+        count: created.length,
+        data: serializeAvailabilities(created)
+      });
     } catch (error) {
       console.error(error);
 
@@ -116,28 +160,46 @@ module.exports = {
     }
 
     try {
-      const availabilities = await prisma.therapistAvailability.findMany({
-        where: {
-          therapistId,
-          ...(dateRange
-            ? {
-              date: {
-                gte: dateRange.start,
-                lt: dateRange.end
-              }
-            }
-            : {})
-        },
-        include: {
-          therapist: true
-        },
-        orderBy: [
-          { date: 'asc' },
-          { startTime: 'asc' }
-        ]
+      const { page, pageSize, skip, take } = parsePagination(req.query, {
+        defaultPageSize: 10
       });
 
-      return res.json(serializeAvailabilities(availabilities));
+      const where = {
+        therapistId,
+        ...(dateRange
+          ? {
+            date: {
+              gte: dateRange.start,
+              lt: dateRange.end
+            }
+          }
+          : {})
+      };
+
+      const [total, availabilities] = await prisma.$transaction([
+        prisma.therapistAvailability.count({ where }),
+        prisma.therapistAvailability.findMany({
+          where,
+          include: {
+            therapist: true
+          },
+          orderBy: [
+            { date: 'asc' },
+            { startTime: 'asc' }
+          ],
+          skip,
+          take
+        })
+      ]);
+
+      return res.json(
+        buildPaginatedResponse(
+          serializeAvailabilities(availabilities),
+          total,
+          page,
+          pageSize
+        )
+      );
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: 'Erro ao listar disponibilidades.' });
@@ -271,6 +333,10 @@ module.exports = {
     }
 
     try {
+      const { page, pageSize } = parsePagination(req.query, {
+        defaultPageSize: 10
+      });
+
       const records = await prisma.therapistAvailability.findMany({
         where: {
           date: {
@@ -304,9 +370,14 @@ module.exports = {
           .push(serializeAvailability(record));
       }
 
+      const professionals = Array.from(groupedByProfessional.values());
+      const total = professionals.length;
+      const start = (page - 1) * pageSize;
+      const data = professionals.slice(start, start + pageSize);
+
       return res.json({
         date,
-        professionals: Array.from(groupedByProfessional.values())
+        ...buildPaginatedResponse(data, total, page, pageSize)
       });
     } catch (error) {
       console.error(error);

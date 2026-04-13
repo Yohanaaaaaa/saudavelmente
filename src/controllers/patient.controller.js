@@ -1,4 +1,9 @@
 const { PrismaClient } = require('@prisma/client');
+const {
+  parsePagination,
+  buildPaginatedResponse
+} = require('../utils/pagination');
+
 const prisma = new PrismaClient();
 
 module.exports = {
@@ -30,8 +35,29 @@ module.exports = {
   },
 
   async list(req, res) {
-    const patients = await prisma.patient.findMany();
-    res.json(patients);
+    try {
+      const { page, pageSize, skip, take } = parsePagination(req.query, {
+        defaultPageSize: 10
+      });
+
+      const [total, patients] = await prisma.$transaction([
+        prisma.patient.count(),
+        prisma.patient.findMany({
+          orderBy: { id: 'asc' },
+          skip,
+          take
+        })
+      ]);
+
+      return res.json(
+        buildPaginatedResponse(patients, total, page, pageSize)
+      );
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        message: 'Erro ao listar pacientes'
+      });
+    }
   },
 
   async findById(req, res) {
