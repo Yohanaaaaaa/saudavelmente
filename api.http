@@ -1,20 +1,19 @@
 @baseUrl = http://localhost:3007
-@token = COLE_TOKEN_JWT_AQUI
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTUsInRpcG8iOiJQQVRJRU5UIiwibm9tZSI6IkpvYW8gZGEgU2lsdmEiLCJub21lQ29tcGxldG8iOiJKb2FvIGRhIFNpbHZhIiwiZW1haWwiOiJqb2FvNkBlbWFpbC5jb20iLCJjZWx1bGFyIjoiOTg5OTk5OTk5OTkiLCJpYXQiOjE3NzYwOTU2MTksImV4cCI6MTc3NjE4MjAxOX0.fPTcu9TzhicGNr5hY-r9UXEzB4QjFR9S9o6YRNarFd8
 
 ### LOGIN (rota publica)
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "vitoria@teste.com.br",
-  "cpf": "12312312311",
+  "email": "joao6@email.com",
+  "cpf": "123.456.789-62",
   "tipo": "PATIENT"
 }
 
-### Criar paciente (protegida)
+### Criar paciente (publica)
 POST {{baseUrl}}/pacientes
 Content-Type: application/json
-Authorization: Bearer {{token}}
 
 {
   "nomeCompleto": "Joao da Silva",
@@ -33,7 +32,6 @@ Authorization: Bearer {{token}}
 ### Criar profissional
 POST {{baseUrl}}/profissionais
 Content-Type: application/json
-Authorization: Bearer {{token}}
 
 {
   "nomeCompleto": "Dra. Ana Lima",

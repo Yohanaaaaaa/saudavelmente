@@ -91,6 +91,8 @@ const authMiddleware = require('./middlewares/auth.middleware');
  *   post:
  *     summary: Registrar usuário
  *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -128,14 +130,14 @@ app.post('/auth/register', authMiddleware, authController.register);
  */
 app.post('/auth/login', authController.login);
 
-app.use(authMiddleware);
-
 /**
  * @swagger
  * /pacientes:
  *   post:
  *     summary: Criar paciente
  *     tags: [Pacientes]
+ *     description: Rota publica (nao requer Bearer token).
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -154,6 +156,8 @@ app.post('/pacientes', patientController.create);
  *   get:
  *     summary: Listar pacientes
  *     tags: [Pacientes]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de pacientes
@@ -166,6 +170,8 @@ app.get('/pacientes', patientController.list);
  *   get:
  *     summary: Buscar paciente por ID
  *     tags: [Pacientes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -187,6 +193,8 @@ app.get('/pacientes/:id', patientController.findById);
  *   post:
  *     summary: Criar profissional (terapeuta)
  *     tags: [Profissionais]
+ *     description: Rota publica (nao requer Bearer token).
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -198,6 +206,7 @@ app.get('/pacientes/:id', patientController.findById);
  *         description: Profissional criado
  */
 app.post('/profissionais', therapistController.create);
+app.use(authMiddleware);
 
 /**
  * @swagger
@@ -205,6 +214,8 @@ app.post('/profissionais', therapistController.create);
  *   get:
  *     summary: Listar profissionais
  *     tags: [Profissionais]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de profissionais
@@ -223,6 +234,8 @@ app.delete('/disponibilidades/:id', availabilityController.delete);
  *   get:
  *     summary: Buscar profissional por ID
  *     tags: [Profissionais]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -251,6 +264,8 @@ app.patch('/solicitacoes/:id/recusar', appointmentController.reject);
  *   post:
  *     summary: Criar atendimento (status inicial PENDENTE)
  *     tags: [Atendimentos]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -270,6 +285,8 @@ app.get('/atendimentos', appointmentController.list);
  *   get:
  *     summary: Listar atendimentos pendentes
  *     tags: [Atendimentos]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de atendimentos pendentes
@@ -286,6 +303,8 @@ app.patch('/atendimentos/:id/recusar', appointmentController.reject);
  *   put:
  *     summary: Atualizar atendimento
  *     tags: [Atendimentos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -320,6 +339,8 @@ app.put('/atendimentos/:id', appointmentController.update);
  *   delete:
  *     summary: Deletar atendimento
  *     tags: [Atendimentos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -343,6 +364,8 @@ app.delete('/atendimentos/:id', appointmentController.delete);
  *   get:
  *     summary: Listar solicitações pendentes (status PENDENTE)
  *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de solicitações
@@ -355,6 +378,8 @@ app.get('/admin/solicitacoes', adminController.listSolicitations);
  *   get:
  *     summary: Listar todos os atendimentos (inclui pagamento)
  *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de atendimentos
@@ -367,6 +392,8 @@ app.get('/admin/atendimentos', adminController.listAppointments);
  *   get:
  *     summary: Listar todos os profissionais
  *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de profissionais
@@ -379,6 +406,8 @@ app.get('/admin/profissionais', adminController.listTherapists);
  *   get:
  *     summary: Listar todos os pacientes (users tipo PACIENTE)
  *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de pacientes
@@ -391,6 +420,8 @@ app.get('/admin/pacientes', adminController.listPatients);
  *   post:
  *     summary: Gerar pagamento PIX
  *     tags: [Pagamento]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -435,6 +466,8 @@ app.post('/pay', paymentController.pay);
  *   get:
  *     summary: Verificar status do pagamento
  *     tags: [Pagamento]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: orderId
@@ -457,6 +490,8 @@ app.get('/pay/status/:orderId', paymentController.checkPaymentStatus);
  *   get:
  *     summary: Dashboard do paciente
  *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: pacienteid
@@ -477,6 +512,8 @@ app.get('/dashboard/paciente/:pacienteid', patientController.dashboardPaciente);
  *   get:
  *     summary: Dashboard do profissional
  *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: profissionalid
@@ -497,6 +534,8 @@ app.get('/dashboard/profissional/:profissionalid', therapistController.dashboard
  *   put:
  *     summary: Atualizar profissional
  *     tags: [Profissionais]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: therapistid
@@ -523,6 +562,8 @@ app.put('/profissional/:therapistid', therapistController.updateByTherapist);
  *   delete:
  *     summary: Deletar profissional
  *     tags: [Profissionais]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: therapistid
@@ -545,6 +586,8 @@ app.delete('/profissional/:therapistid', therapistController.delete);
  *   put:
  *     summary: Atualizar paciente
  *     tags: [Pacientes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: patientid
@@ -571,6 +614,8 @@ app.put('/paciente/:patientid', patientController.updateByPatient);
  *   delete:
  *     summary: Deletar paciente
  *     tags: [Pacientes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: patientid

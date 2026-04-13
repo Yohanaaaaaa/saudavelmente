@@ -232,6 +232,8 @@
  *   post:
  *     summary: Criar solicitacao de agendamento
  *     tags: [Solicitacoes]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -250,6 +252,8 @@
  *   get:
  *     summary: Listar solicitacoes (com paginacao e filtros)
  *     tags: [Solicitacoes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -281,6 +285,8 @@
  *   get:
  *     summary: Buscar solicitacao por ID
  *     tags: [Solicitacoes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -299,6 +305,8 @@
  *   put:
  *     summary: Atualizar solicitacao
  *     tags: [Solicitacoes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -321,6 +329,8 @@
  *   delete:
  *     summary: Deletar solicitacao
  *     tags: [Solicitacoes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -335,6 +345,8 @@
  *   get:
  *     summary: Listar solicitacoes pendentes (com paginacao e filtros)
  *     tags: [Solicitacoes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -366,6 +378,8 @@
  *   patch:
  *     summary: Aprovar solicitacao
  *     tags: [Solicitacoes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -382,6 +396,8 @@
  *   patch:
  *     summary: Recusar solicitacao
  *     tags: [Solicitacoes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -398,6 +414,8 @@
  *   post:
  *     summary: Criar disponibilidade (unitaria ou em lote por lista de dias)
  *     tags: [Disponibilidades]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: therapistId
@@ -416,6 +434,8 @@
  *   get:
  *     summary: Listar disponibilidades do profissional (com paginacao)
  *     tags: [Disponibilidades]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: therapistId
@@ -450,6 +470,8 @@
  *   get:
  *     summary: Buscar disponibilidade por ID
  *     tags: [Disponibilidades]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -468,6 +490,8 @@
  *   put:
  *     summary: Atualizar disponibilidade
  *     tags: [Disponibilidades]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -490,6 +514,8 @@
  *   delete:
  *     summary: Deletar disponibilidade
  *     tags: [Disponibilidades]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -504,6 +530,8 @@
  *   get:
  *     summary: Listar profissionais disponiveis por data (com paginacao)
  *     tags: [Disponibilidades]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: date

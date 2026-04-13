@@ -57,6 +57,8 @@
  *   get:
  *     summary: Listar pacientes com paginacao
  *     tags: [Pacientes]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -80,6 +82,8 @@
  *   get:
  *     summary: Listar profissionais com paginacao
  *     tags: [Profissionais]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -103,6 +107,8 @@
  *   get:
  *     summary: Listar atendimentos com paginacao e filtros
  *     tags: [Atendimentos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -132,6 +138,8 @@
  *   get:
  *     summary: Listar atendimentos pendentes com paginacao e filtros
  *     tags: [Atendimentos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -161,6 +169,8 @@
  *   get:
  *     summary: Listar solicitacoes pendentes com paginacao e filtros
  *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -190,6 +200,8 @@
  *   get:
  *     summary: Listar atendimentos com paginacao e filtros
  *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -219,6 +231,8 @@
  *   get:
  *     summary: Listar profissionais com paginacao
  *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -240,6 +254,8 @@
  *   get:
  *     summary: Listar pacientes com paginacao
  *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
