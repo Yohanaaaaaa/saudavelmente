@@ -3,6 +3,11 @@ const appmax = require('../services/appmax.service');
 const { minutosDePagamento } = require('../utils/expiracao');
 const { serializeAppointment } = require('../utils/appointment-status');
 const { parseId } = require('../utils/agenda');
+const { carregarAgendamentoDoUsuario } = require('../utils/agendamento-acesso');
+const {
+  formatarDataHora,
+  notificarAgendamento
+} = require('../services/notificacao.service');
 
 const prisma = new PrismaClient();
 
@@ -36,7 +41,24 @@ function serializePayment(payment) {
   };
 }
 
+function diasParaRepasse() {
+  const parsed = Number(process.env.REPASSE_DIAS);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 7;
+}
+
+/**
+ * Confirma o pagamento, agenda o repasse do psicologo (card P1 - Gestao
+ * Financeira) e avisa as duas pontas (card P1 - Confirmacao do Agendamento).
+ */
 async function confirmarPagamento(payment) {
+  const agendamento = await prisma.appointment.findUnique({
+    where: { id: payment.appointmentId },
+    include: { patient: true, therapist: true }
+  });
+
+  const previsaoData = new Date();
+  previsaoData.setDate(previsaoData.getDate() + diasParaRepasse());
+
   const [pagamentoAtualizado] = await prisma.$transaction([
     prisma.payment.update({
       where: { id: payment.id },
@@ -45,37 +67,34 @@ async function confirmarPagamento(payment) {
     prisma.appointment.update({
       where: { id: payment.appointmentId },
       data: { status: 'CONFIRMADO', expiresAt: null }
+    }),
+    prisma.payout.upsert({
+      where: { paymentId: payment.id },
+      create: {
+        paymentId: payment.id,
+        therapistId: agendamento.therapistId,
+        valor: payment.valorProfissional ?? payment.valor,
+        previsaoData
+      },
+      update: {
+        valor: payment.valorProfissional ?? payment.valor,
+        previsaoData
+      }
     })
   ]);
 
+  if (agendamento) {
+    const atualizado = { ...agendamento, status: 'CONFIRMADO' };
+
+    await notificarAgendamento(prisma, atualizado, {
+      tipo: 'PAGAMENTO_CONFIRMADO',
+      titulo: 'Consulta confirmada',
+      mensagemPaciente: `Pagamento confirmado. Sua consulta com ${agendamento.therapist.nomeCompleto} esta marcada para ${formatarDataHora(agendamento)}.`,
+      mensagemPsicologo: `Nova consulta confirmada com ${agendamento.patient.nomeCompleto} em ${formatarDataHora(agendamento)}.`
+    });
+  }
+
   return pagamentoAtualizado;
-}
-
-async function carregarAgendamentoDoUsuario(req, appointmentId) {
-  const appointment = await prisma.appointment.findUnique({
-    where: { id: appointmentId },
-    include: { patient: true, therapist: true, payment: true }
-  });
-
-  if (!appointment) {
-    return { erro: { status: 404, message: 'Agendamento nao encontrado.' } };
-  }
-
-  const tipo = String(req.user?.tipo || '').toUpperCase();
-  const usuarioId = Number(req.user?.id);
-
-  const ehDono =
-    (tipo === 'PATIENT' && appointment.patientId === usuarioId) ||
-    (tipo === 'THERAPIST' && appointment.therapistId === usuarioId) ||
-    tipo === 'ADMIN';
-
-  if (!ehDono) {
-    return {
-      erro: { status: 403, message: 'Esse agendamento nao pertence a voce.' }
-    };
-  }
-
-  return { appointment };
 }
 
 module.exports = {
@@ -91,6 +110,7 @@ module.exports = {
 
     try {
       const { appointment, erro } = await carregarAgendamentoDoUsuario(
+        prisma,
         req,
         appointmentId
       );
@@ -238,6 +258,7 @@ module.exports = {
 
     try {
       const { appointment, erro } = await carregarAgendamentoDoUsuario(
+        prisma,
         req,
         appointmentId
       );

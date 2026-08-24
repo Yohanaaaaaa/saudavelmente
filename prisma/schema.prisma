@@ -24,6 +24,9 @@ model Patient {
   estado       String?
   senha        String?
 
+  notificaEmail    Boolean @default(true)
+  notificaWhatsapp Boolean @default(true)
+
   appointments Appointment[]
   reservas     Reserva[]
 
@@ -75,11 +78,16 @@ model Therapist {
   cidade           String?
   estado           String?
   statusCadastro   StatusCadastro @default(PENDENTE)
+  motivoRejeicao   String?
   ativo            Boolean        @default(true)
+
+  notificaEmail    Boolean @default(true)
+  notificaWhatsapp Boolean @default(true)
 
   appointments   Appointment[]
   availabilities TherapistAvailability[]
   reservas       Reserva[]
+  payouts        Payout[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -127,6 +135,15 @@ model Appointment {
   availabilityId Int?
   availability   TherapistAvailability? @relation(fields: [availabilityId], references: [id], onDelete: SetNull)
 
+  canceladoPor        String?
+  canceladoEm         DateTime?
+  motivoCancelamento  String?
+  realizadoEm         DateTime?
+
+  remarcadoDeId Int?         @unique
+  remarcadoDe   Appointment? @relation("Remarcacao", fields: [remarcadoDeId], references: [id])
+  remarcadoPara Appointment? @relation("Remarcacao")
+
   payment Payment?
   reserva Reserva?
 
@@ -134,6 +151,7 @@ model Appointment {
   updatedAt DateTime @default(now()) @updatedAt
 
   @@index([therapistId, horario_atendimento])
+  @@index([patientId, horario_atendimento])
   @@index([status, expiresAt])
 }
 
@@ -226,8 +244,152 @@ model Payment {
   appointmentId Int         @unique
   appointment   Appointment @relation(fields: [appointmentId], references: [id])
 
+  payout Payout?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
   @@index([externalOrderId])
+}
+
+enum UsuarioTipo {
+  PATIENT
+  THERAPIST
+  ADMIN
+}
+
+enum PayoutStatus {
+  PENDENTE
+  PAGO
+  CANCELADO
+}
+
+/// Repasse do valor da consulta para o psicologo.
+model Payout {
+  id     Int          @id @default(autoincrement())
+  valor  Float
+  status PayoutStatus @default(PENDENTE)
+
+  previsaoData DateTime
+  pagoEm       DateTime?
+  observacao   String?
+
+  therapistId Int
+  therapist   Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+
+  paymentId Int     @unique
+  payment   Payment @relation(fields: [paymentId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([therapistId, status])
+}
+
+enum NotificationTipo {
+  AGENDAMENTO_CRIADO
+  AGENDAMENTO_CONFIRMADO
+  AGENDAMENTO_CANCELADO
+  AGENDAMENTO_REMARCADO
+  PAGAMENTO_CONFIRMADO
+  CADASTRO_APROVADO
+  CADASTRO_REJEITADO
+  SUPORTE_ATUALIZADO
+  SENHA_ALTERADA
+}
+
+/// Central de notificacoes de pacientes, psicologos e admins.
+model Notification {
+  id Int @id @default(autoincrement())
+
+  destinatarioTipo UsuarioTipo
+  destinatarioId   Int
+
+  tipo      NotificationTipo
+  titulo    String
+  mensagem  String
+  payload   Json?
+  lida      Boolean   @default(false)
+  lidaEm    DateTime?
+
+  appointmentId Int?
+
+  createdAt DateTime @default(now())
+
+  @@index([destinatarioTipo, destinatarioId, lida])
+  @@index([createdAt])
+}
+
+/// Token de recuperacao de senha (guardado como hash).
+model PasswordResetToken {
+  id Int @id @default(autoincrement())
+
+  usuarioTipo UsuarioTipo
+  usuarioId   Int
+  email       String
+
+  tokenHash String    @unique
+  expiresAt DateTime
+  usadoEm   DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([usuarioTipo, usuarioId])
+}
+
+enum TicketStatus {
+  ABERTO
+  EM_ANDAMENTO
+  RESOLVIDO
+  FECHADO
+}
+
+enum TicketPrioridade {
+  BAIXA
+  MEDIA
+  ALTA
+}
+
+/// Central de suporte: chamados abertos por pacientes e psicologos.
+model SupportTicket {
+  id Int @id @default(autoincrement())
+
+  assunto   String
+  descricao String
+
+  status     TicketStatus     @default(ABERTO)
+  prioridade TicketPrioridade @default(MEDIA)
+
+  solicitanteTipo UsuarioTipo
+  solicitanteId   Int
+  solicitanteNome String
+
+  appointmentId Int?
+
+  mensagens SupportMessage[]
+
+  resolvidoEm DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([status, createdAt])
+  @@index([solicitanteTipo, solicitanteId])
+}
+
+model SupportMessage {
+  id Int @id @default(autoincrement())
+
+  ticketId Int
+  ticket   SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  autorTipo UsuarioTipo
+  autorId   Int
+  autorNome String
+  mensagem  String
+  interna   Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([ticketId, createdAt])
 }

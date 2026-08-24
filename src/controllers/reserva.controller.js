@@ -15,6 +15,10 @@ const {
   minutosDeReserva
 } = require('../utils/expiracao');
 const { serializeAppointment } = require('../utils/appointment-status');
+const {
+  formatarDataHora,
+  notificarAgendamento
+} = require('../services/notificacao.service');
 
 const prisma = new PrismaClient();
 
@@ -345,6 +349,13 @@ module.exports = {
         });
 
         return criado;
+      });
+
+      await notificarAgendamento(prisma, agendamento, {
+        tipo: 'AGENDAMENTO_CRIADO',
+        titulo: 'Agendamento iniciado',
+        mensagemPaciente: `Seu horario com ${agendamento.therapist.nomeCompleto} em ${formatarDataHora(agendamento)} esta reservado. Conclua o pagamento em ate ${minutosDePagamento()} minutos.`,
+        mensagemPsicologo: `${agendamento.patient.nomeCompleto} iniciou um agendamento para ${formatarDataHora(agendamento)} e esta finalizando o pagamento.`
       });
 
       return res.status(201).json({
