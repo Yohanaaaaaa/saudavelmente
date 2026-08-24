@@ -14,21 +14,37 @@ datasource db {
 }
 
 model Patient {
-  id           Int    @id @default(autoincrement())
+  id           Int     @id @default(autoincrement())
   nomeCompleto String
-  cpf          String @unique
-  email        String @unique
+  cpf          String  @unique
+  email        String  @unique
   celular      String
-  idade        Int
-  cidade       String
-  estado       String
+  idade        Int?
+  cidade       String?
+  estado       String?
+  senha        String?
 
   appointments Appointment[]
+  reservas     Reserva[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 enum TipoAtendimento {
   VOLUNTARIO
   SOCIAL
+}
+
+enum Modalidade {
+  ONLINE
+  PRESENCIAL
+}
+
+enum StatusCadastro {
+  PENDENTE
+  APROVADO
+  REJEITADO
 }
 
 model Therapist {
@@ -44,8 +60,29 @@ model Therapist {
   pix                     String
   cpf                     String?         @unique
 
-  appointments  Appointment[]
+  // Perfil publico (catalogo e perfil completo)
+  senha            String?
+  slug             String?        @unique
+  fotoUrl          String?
+  bio              String?
+  formacao         String?
+  especialidades   String[]       @default([])
+  idiomas          String[]       @default([])
+  modalidades      Modalidade[]   @default([])
+  experienciaAnos  Int?
+  valorConsulta    Float?
+  duracaoConsulta  Int            @default(50)
+  cidade           String?
+  estado           String?
+  statusCadastro   StatusCadastro @default(PENDENTE)
+  ativo            Boolean        @default(true)
+
+  appointments   Appointment[]
   availabilities TherapistAvailability[]
+  reservas       Reserva[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Admin {
@@ -59,9 +96,14 @@ model Admin {
 
 enum AppointmentStatus {
   PENDENTE
+  AGUARDANDO_PAGAMENTO
   APROVADO
+  CONFIRMADO
   RECUSADO
   CANCELADO
+  REMARCADO
+  REALIZADO
+  FALTA
 }
 
 model Appointment {
@@ -71,6 +113,10 @@ model Appointment {
   horario_atendimento DateTime
   data_atendimento    String
   status              AppointmentStatus @default(PENDENTE)
+  modalidade          Modalidade        @default(ONLINE)
+  valor               Float?
+  duracaoMinutos      Int?
+  expiresAt           DateTime?
 
   patientId   Int
   therapistId Int
@@ -78,9 +124,17 @@ model Appointment {
   patient   Patient   @relation(fields: [patientId], references: [id])
   therapist Therapist @relation(fields: [therapistId], references: [id])
 
+  availabilityId Int?
+  availability   TherapistAvailability? @relation(fields: [availabilityId], references: [id], onDelete: SetNull)
+
   payment Payment?
+  reserva Reserva?
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([therapistId, horario_atendimento])
+  @@index([status, expiresAt])
 }
 
 model TherapistAvailability {
@@ -93,28 +147,87 @@ model TherapistAvailability {
 
   therapist Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
 
+  appointments Appointment[]
+  reservas     Reserva[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([therapistId, date, startTime, endTime])
   @@index([therapistId, date])
   @@index([date, isAvailable])
-  @@unique([therapistId, date, startTime, endTime])
+}
+
+enum ReservaStatus {
+  ATIVA
+  CONVERTIDA
+  EXPIRADA
+  CANCELADA
+}
+
+/// Reserva temporaria do horario, criada antes do cadastro do paciente.
+/// Permite a jornada: escolher psicologo -> escolher horario -> cadastrar -> pagar.
+model Reserva {
+  id String @id @default(uuid())
+
+  therapistId Int
+  therapist   Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+
+  availabilityId Int?
+  availability   TherapistAvailability? @relation(fields: [availabilityId], references: [id], onDelete: SetNull)
+
+  data_atendimento    String
+  horario_atendimento DateTime
+  duracaoMinutos      Int
+  modalidade          Modalidade @default(ONLINE)
+  valor               Float?
+
+  status    ReservaStatus @default(ATIVA)
+  expiresAt DateTime
+
+  patientId Int?
+  patient   Patient? @relation(fields: [patientId], references: [id], onDelete: SetNull)
+
+  appointmentId Int?         @unique
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([therapistId, horario_atendimento])
+  @@index([status, expiresAt])
 }
 
 enum PaymentStatus {
   PENDENTE
   PAGO
   CANCELADO
+  EXPIRADO
+  ESTORNADO
 }
 
 model Payment {
   id     Int           @id @default(autoincrement())
   valor  Float
-  status PaymentStatus
-  metodo String
+  status PaymentStatus @default(PENDENTE)
+  metodo String        @default("PIX")
+
+  provedor           String  @default("appmax")
+  externalOrderId    String?
+  externalCustomerId String?
+  qrCode             String?
+  copiaECola         String?
+  taxaPlataforma     Float?
+  valorProfissional  Float?
+
+  expiraEm DateTime?
+  pagoEm   DateTime?
 
   appointmentId Int         @unique
   appointment   Appointment @relation(fields: [appointmentId], references: [id])
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([externalOrderId])
 }

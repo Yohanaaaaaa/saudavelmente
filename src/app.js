@@ -16,7 +16,11 @@ const appointmentController = require('./controllers/appointment.controller');
 const adminController = require('./controllers/admin.controller');
 const paymentController = require('./controllers/payment.controller');
 const availabilityController = require('./controllers/availability.controller');
+const catalogoController = require('./controllers/catalogo.controller');
+const reservaController = require('./controllers/reserva.controller');
+const pagamentoController = require('./controllers/pagamento.controller');
 const authMiddleware = require('./middlewares/auth.middleware');
+const { requireTipo } = require('./middlewares/role.middleware');
 
 /**
  * @swagger
@@ -206,7 +210,48 @@ app.get('/pacientes/:id', patientController.findById);
  *         description: Profissional criado
  */
 app.post('/profissionais', therapistController.create);
+
+/* ------------------------------------------------------------------ *
+ * Fluxo publico de agendamento (cards P0)
+ * Documentado em src/docs/agendamento-publico.swagger.js
+ * ------------------------------------------------------------------ */
+
+// Catalogo e perfil publico do psicologo
+app.get('/publico/psicologos', catalogoController.listar);
+app.get('/publico/psicologos/especialidades', catalogoController.especialidades);
+app.get('/publico/psicologos/:idOrSlug', catalogoController.perfil);
+app.get('/publico/psicologos/:idOrSlug/horarios', catalogoController.horarios);
+
+// Reserva temporaria do horario, feita antes do cadastro
+app.post('/publico/reservas', reservaController.criar);
+app.get('/publico/reservas/:id', reservaController.obter);
+app.delete('/publico/reservas/:id', reservaController.cancelar);
+
+// Cadastro simplificado do paciente
+app.post('/auth/cadastro', authController.cadastro);
+
+// Webhook do provedor de pagamento
+app.post('/webhooks/appmax', pagamentoController.webhook);
+
 app.use(authMiddleware);
+
+/* ------------------------------------------------------------------ *
+ * Fluxo autenticado de agendamento (cards P0)
+ * ------------------------------------------------------------------ */
+app.post(
+  '/reservas/:id/confirmar',
+  requireTipo('PATIENT'),
+  reservaController.confirmar
+);
+app.post(
+  '/agendamentos/:appointmentId/pagamento',
+  requireTipo('PATIENT', 'ADMIN'),
+  pagamentoController.criar
+);
+app.get(
+  '/agendamentos/:appointmentId/pagamento',
+  pagamentoController.status
+);
 
 /**
  * @swagger
