@@ -16,7 +16,17 @@ const appointmentController = require('./controllers/appointment.controller');
 const adminController = require('./controllers/admin.controller');
 const paymentController = require('./controllers/payment.controller');
 const availabilityController = require('./controllers/availability.controller');
+const catalogoController = require('./controllers/catalogo.controller');
+const reservaController = require('./controllers/reserva.controller');
+const pagamentoController = require('./controllers/pagamento.controller');
+const agendamentoFluxoController = require('./controllers/agendamento-fluxo.controller');
+const contaController = require('./controllers/conta.controller');
+const notificacaoController = require('./controllers/notificacao.controller');
+const profissionalController = require('./controllers/profissional.controller');
+const adminGestaoController = require('./controllers/admin-gestao.controller');
+const suporteController = require('./controllers/suporte.controller');
 const authMiddleware = require('./middlewares/auth.middleware');
+const { requireTipo } = require('./middlewares/role.middleware');
 
 /**
  * @swagger
@@ -206,7 +216,136 @@ app.get('/pacientes/:id', patientController.findById);
  *         description: Profissional criado
  */
 app.post('/profissionais', therapistController.create);
+
+/* ------------------------------------------------------------------ *
+ * Fluxo publico de agendamento (cards P0)
+ * Documentado em src/docs/agendamento-publico.swagger.js
+ * ------------------------------------------------------------------ */
+
+// Catalogo e perfil publico do psicologo
+app.get('/publico/psicologos', catalogoController.listar);
+app.get('/publico/psicologos/especialidades', catalogoController.especialidades);
+app.get('/publico/psicologos/:idOrSlug', catalogoController.perfil);
+app.get('/publico/psicologos/:idOrSlug/horarios', catalogoController.horarios);
+
+// Reserva temporaria do horario, feita antes do cadastro
+app.post('/publico/reservas', reservaController.criar);
+app.get('/publico/reservas/:id', reservaController.obter);
+app.delete('/publico/reservas/:id', reservaController.cancelar);
+
+// Cadastro simplificado do paciente
+app.post('/auth/cadastro', authController.cadastro);
+
+// Recuperacao de senha
+app.post('/auth/esqueci-senha', contaController.esqueciSenha);
+app.post('/auth/redefinir-senha', contaController.redefinirSenha);
+
+// Webhook do provedor de pagamento
+app.post('/webhooks/appmax', pagamentoController.webhook);
+
 app.use(authMiddleware);
+
+/* ------------------------------------------------------------------ *
+ * Fluxo autenticado de agendamento (cards P0)
+ * ------------------------------------------------------------------ */
+app.post(
+  '/reservas/:id/confirmar',
+  requireTipo('PATIENT'),
+  reservaController.confirmar
+);
+app.post(
+  '/agendamentos/:appointmentId/pagamento',
+  requireTipo('PATIENT', 'ADMIN'),
+  pagamentoController.criar
+);
+app.get(
+  '/agendamentos/:appointmentId/pagamento',
+  pagamentoController.status
+);
+
+/* ------------------------------------------------------------------ *
+ * Cards P1
+ * Documentado em src/docs/gestao-plataforma.swagger.js
+ * ------------------------------------------------------------------ */
+
+// Confirmacao, cancelamento e remarcacao
+app.get('/agendamentos/:id/confirmacao', agendamentoFluxoController.confirmacao);
+app.post('/agendamentos/:id/cancelar', agendamentoFluxoController.cancelar);
+app.post('/agendamentos/:id/remarcar', agendamentoFluxoController.remarcar);
+
+// Configuracoes da conta
+app.get('/me', contaController.meusDados);
+app.patch('/me', contaController.atualizarDados);
+app.patch('/me/senha', contaController.alterarSenha);
+app.patch('/me/preferencias', contaController.atualizarPreferencias);
+
+// Central de notificacoes
+app.get('/notificacoes', notificacaoController.listar);
+app.get('/notificacoes/nao-lidas', notificacaoController.contarNaoLidas);
+app.patch('/notificacoes/lidas', notificacaoController.marcarTodasLidas);
+app.patch('/notificacoes/:id/lida', notificacaoController.marcarLida);
+
+// Area do psicologo: painel, perfil, agenda, historico e financeiro
+app.get('/profissional/me', requireTipo('THERAPIST'), profissionalController.meuPerfil);
+app.put('/profissional/me', requireTipo('THERAPIST'), profissionalController.atualizarPerfil);
+app.get('/profissional/me/painel', requireTipo('THERAPIST'), profissionalController.painel);
+app.get('/profissional/me/agenda', requireTipo('THERAPIST'), profissionalController.minhaAgenda);
+app.post(
+  '/profissional/me/agenda/recorrencia',
+  requireTipo('THERAPIST'),
+  profissionalController.criarRecorrencia
+);
+app.patch(
+  '/profissional/me/disponibilidades/:id',
+  requireTipo('THERAPIST'),
+  profissionalController.alternarDisponibilidade
+);
+app.get(
+  '/profissional/me/consultas',
+  requireTipo('THERAPIST'),
+  profissionalController.minhasConsultas
+);
+app.patch(
+  '/profissional/me/consultas/:id/presenca',
+  requireTipo('THERAPIST'),
+  profissionalController.registrarPresenca
+);
+app.get(
+  '/profissional/me/financeiro',
+  requireTipo('THERAPIST'),
+  profissionalController.financeiro
+);
+
+// Central de suporte
+app.post('/suporte/tickets', requireTipo('PATIENT', 'THERAPIST'), suporteController.criar);
+app.get('/suporte/tickets', requireTipo('PATIENT', 'THERAPIST'), suporteController.meusTickets);
+app.get('/suporte/tickets/:id', suporteController.detalhar);
+app.post('/suporte/tickets/:id/mensagens', suporteController.responder);
+app.get('/admin/suporte/tickets', requireTipo('ADMIN'), suporteController.listarParaAdmin);
+app.patch(
+  '/admin/suporte/tickets/:id/status',
+  requireTipo('ADMIN'),
+  suporteController.alterarStatus
+);
+
+// Gestao administrativa
+app.get('/admin/psicologos', requireTipo('ADMIN'), adminGestaoController.listarPsicologos);
+app.get('/admin/psicologos/:id', requireTipo('ADMIN'), adminGestaoController.detalharPsicologo);
+app.patch(
+  '/admin/psicologos/:id/status',
+  requireTipo('ADMIN'),
+  adminGestaoController.alterarStatusCadastro
+);
+app.patch(
+  '/admin/psicologos/:id/ativo',
+  requireTipo('ADMIN'),
+  adminGestaoController.alterarAtivo
+);
+app.get('/admin/pacientes/:id', requireTipo('ADMIN'), adminGestaoController.detalharPaciente);
+app.get('/admin/agendamentos', requireTipo('ADMIN'), adminGestaoController.listarAgendamentos);
+app.get('/admin/relatorios', requireTipo('ADMIN'), adminGestaoController.relatorios);
+app.get('/admin/repasses', requireTipo('ADMIN'), adminGestaoController.listarRepasses);
+app.patch('/admin/repasses/:id/pagar', requireTipo('ADMIN'), adminGestaoController.pagarRepasse);
 
 /**
  * @swagger
