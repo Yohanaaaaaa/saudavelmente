@@ -8,10 +8,14 @@ services:
     # Segredos ficam fora da pasta da stack porque o deploy e por GitOps:
     # o Portainer reclona o repositorio e reescreve o stack.env a cada
     # atualizacao, apagando qualquer valor colocado direto no arquivo.
-    # O arquivo abaixo vive no host e nao e tocado pelo deploy.
+    #
+    # O caminho abaixo e resolvido pelo compose que roda DENTRO do container
+    # do Portainer, onde o volume portainer_data esta montado em /data.
+    # No host o arquivo fica em:
+    #   /var/lib/docker/volumes/portainer_data/_data/compose/secrets/api.env
     # Contem JWT_SECRET e APPMAX_ACCESS_TOKEN.
     env_file:
-      - /opt/saudavelmente/api.env
+      - /data/compose/secrets/api.env
     environment:
       NODE_ENV: production
       PORT: 3007
