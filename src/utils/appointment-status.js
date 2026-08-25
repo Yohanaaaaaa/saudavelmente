@@ -44,13 +44,33 @@ function toAppointmentStatus(code) {
   };
 }
 
+// Nunca devolver esses campos dentro do paciente ou do profissional
+// aninhado no agendamento.
+const CAMPOS_SENSIVEIS = ['senha', 'cpf', 'pix'];
+
+function limparUsuario(usuario) {
+  if (!usuario || typeof usuario !== 'object') return usuario;
+
+  const copia = { ...usuario };
+  for (const campo of CAMPOS_SENSIVEIS) {
+    delete copia[campo];
+  }
+
+  return copia;
+}
+
 function serializeAppointment(appointment) {
   if (!appointment) return appointment;
 
-  return {
+  const serializado = {
     ...appointment,
     status: toAppointmentStatus(appointment.status)
   };
+
+  if (serializado.patient) serializado.patient = limparUsuario(serializado.patient);
+  if (serializado.therapist) serializado.therapist = limparUsuario(serializado.therapist);
+
+  return serializado;
 }
 
 function serializeAppointments(appointments = []) {
