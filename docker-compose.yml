@@ -9,6 +9,11 @@ services:
       NODE_ENV: production
       PORT: 3007
       DATABASE_URL: ${DATABASE_URL}
+      # Sem JWT_SECRET a aplicacao cai no valor padrao que esta no codigo,
+      # e o repositorio e publico. Defina no .env da stack.
+      JWT_SECRET: ${JWT_SECRET}
+      BASE_URL: ${BASE_URL}
+      APPMAX_ACCESS_TOKEN: ${APPMAX_ACCESS_TOKEN}
     deploy:
       replicas: 1
       restart_policy:
