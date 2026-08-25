@@ -14,4 +14,7 @@ RUN npx prisma generate
 COPY . .
 
 EXPOSE 3007
-CMD ["node", "server.js"]
+
+# Aplica as migrations pendentes antes de subir a API. Sem isso a imagem nova
+# sobe contra o schema antigo e as consultas quebram com erro 500.
+CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]

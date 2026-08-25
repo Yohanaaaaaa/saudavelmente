@@ -7,6 +7,7 @@ const swaggerSpec = require("../swagger");
 const app = express();
 app.use(cors())
 app.use(express.json());
+app.use(require('./middlewares/sanitize.middleware'));
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 const authController = require('./controllers/auth.controller');
